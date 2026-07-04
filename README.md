@@ -1,4 +1,4 @@
-# SvxLink Dashboard V4.0 by CN8VX
+# SvxLink Dashboard V4.1 by CN8VX - Mod by SP2ONG
 
 ![Version](https://img.shields.io/badge/version-4.0-blue)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple)
@@ -20,6 +20,14 @@ With its intuitive interface, it provides real-time visibility of system status,
 
 Compatible with SvxLink v2 and v3+, running on Debian 12/13 and Raspberry Pi OS (Bookworm and Trixie).
 
+SP2ONG MOD:
+
+**Summary**
+
+While load-testing the dashboard with multiple simultaneous browser clients on a low-power SBC, we found that CPU usage scaled roughly linearly with the number of open dashboard windows (~25% per additional viewer, reaching 100% with just 3 concurrent clients). Root cause: the frontend (main.js) polls several PHP endpoints independently for every open browser tab (every 5-10s), and those endpoints re-run expensive shell_exec() calls (systemctl, tail | egrep) and, in one case, a full-log cat + per-line PHP parsing — all with zero caching, so the cost multiplies with every additional viewer instead of being shared.
+This patch adds a lightweight, TTL-based file cache shared across all requests/clients, so the expensive work runs at most once per cache window regardless of how many people have the dashboard open, plus a couple of related fixes. Net result in our testing: CPU usage with 3 concurrent clients dropped from ~100% to ~12%.
+
+The install instructions use chmod -R 777 on the web root — should be replaced with proper ownership (www-data:www-data) and 755/644 permissions, especially since this dashboard is often exposed publicly.
 
 ## 📸 Screenshots
 
