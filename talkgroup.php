@@ -3,15 +3,14 @@
  * SvxLink Dashboard by CN8VX © 2026
  * Talk Groups display page
  *
- * Les données sont lues directement depuis include/talkgroups.php
- * Data is read directly from include/talkgroups.php
+ * Les données sont lues directement depuis include/talkgroups.json
+ * Data is read directly from include/talkgroups.json
  *
  * Toute modification de ce fichier est automatiquement reflétée au rechargement de la page
  * Any changes made to this file are automatically reflected when the page is refreshed
 */
 require_once __DIR__ . '/include/infosvx.php';
 require_once __DIR__ . '/include/hardware_info.php';
-require_once __DIR__ . '/include/talkgroups.php';
 
 $hw             = getAllHardwareInfo();
 $repeaterData   = getRepeaterStatus();
@@ -19,7 +18,14 @@ $repeaterStatus = $repeaterData['status'];
 $rsDesc         = $repeaterData['description'];
 $hasLogo        = (LOGO_PATH !== '' && file_exists(__DIR__ . '/' . LOGO_PATH));
 
-$talkgroups = $tgdb_array;
+$tgJsonPath = __DIR__ . '/include/talkgroups.json';
+$talkgroups = [];
+if (is_readable($tgJsonPath)) {
+    $decoded = json_decode(file_get_contents($tgJsonPath), true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        $talkgroups = $decoded;
+    }
+}
 
 ksort($talkgroups, SORT_NUMERIC);
 
@@ -89,7 +95,7 @@ $totalTG = count($talkgroups);
                 ?>
                 <tr class="empty-row">
                     <td colspan="3" class="tg-empty">
-                        ⚠️ No Talk Group defined in <code class=cde>talkgroups.php</code>
+                        ⚠️ No Talk Group defined in <code class=cde>talkgroups.json</code>
                         <br><br>
                         <small>Format: <code>'TG_NUMBER' => 'Talk Group Name'</code></small>
                     </td>
@@ -100,7 +106,7 @@ $totalTG = count($talkgroups);
     </div>
     
     <div class="tg-note">
-        💡Any changes made to the <code class=cde>talkgroups.php</code> 
+        💡Any changes made to the <code class=cde>talkgroups.json</code> 
         file will be automatically reflected in this table. Simply refresh this page by pressing the <code class=cde>F5</code> key.
     </div>
 </div> 
