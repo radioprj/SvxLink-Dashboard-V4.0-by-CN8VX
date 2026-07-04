@@ -1043,6 +1043,7 @@ function getReflectorActivity(int $max = 50): array {
                 'tg'           => $start['tg'],
                 'tg_name'      => getTGName($start['tg']),
                 'duration'     => $duration,
+                'duration_unknown' => false,
                 'active'       => false,
                 'entry_type'   => 'rx',
                 'source'       => 'talker',
