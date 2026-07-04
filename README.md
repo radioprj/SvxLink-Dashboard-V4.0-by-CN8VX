@@ -6,10 +6,54 @@
 ![Compatibility](https://img.shields.io/badge/Raspberry%20Pi-compatible-green)
 ![SvxLink](https://img.shields.io/badge/SvxLink-v2%2B-orange)
 
-<img src="https://flagcdn.com/w20/us.png" width="20"/> **[English](#english)** | <img src="https://flagcdn.com/w20/fr.png" width="20"/> **[Français](#français)**
+<img src="https://flagcdn.com/w20/pl.png" width="20"/> **[Polski](#polish)** | <img src="https://flagcdn.com/w20/us.png" width="20"/> **[English](#english)** | <img src="https://flagcdn.com/w20/fr.png" width="20"/> **[Français](#français)**
 
 ---
+<a name="polish"></a>
+## <img src="https://flagcdn.com/w20/pl.png" width="30"/> Polski
 
+Modyfikacja svxlink dashboard zrobionego przez CN8VX który można użyć równolegle z dashbaord w obrazach SP2ONG wgrywając kod do katalogu /var/www/dash/ i udostępnić go np publicznie jako dashbaord przemiennika czy publicznego hotspota
+
+    sudo -s
+    cd /var/www/
+    git clone https://github.com/radioprj/SvxLink-Dashboard-V4.0-by-CN8VX.git
+    mv SvxLink-Dashboard-V4.0-by-CN8VX dash
+    chown -R svxlink:svxlink /var/www/dash
+    find /var/www/dash -type d -exec chmod 755 {} \;
+    find /var/www/dash -type f -exec chmod 644 {} \;
+    
+Utwórz plik w /etc/apache2/sites-available/dash.conf
+
+    <VirtualHost *:8000>
+	ServerName hotspotfm
+	ServerAdmin SVXLink@localhost
+	DocumentRoot /var/www/dash
+        DirectoryIndex index.php index.html
+	#ErrorLog ${APACHE_LOG_DIR}/error.log
+	#CustomLog ${APACHE_LOG_DIR}/access.log combined
+    </VirtualHost>
+Dopisz w /etc/apache2/ports.conf  następującą linie: Listen **8000**
+
+    ....
+    Listen 80
+    Listen 8000
+    ....
+    
+Następnie wykonaj:
+
+    cd /etc/apache2/sites-enabled/
+    ln -s /etc/apache2/sites-available/dash.conf dash.conf
+
+Zrób restart apache2 servwer
+
+    systemctl restart apache2
+
+Możesz teraz zobaczyć dashbaord pisząc w przeglądarce: http://ip_adres_svxlink:8000
+Możesz np w firewall przekierować odwołanie z zewnątrz dla portu 80 na wewnętrzny port 8000
+dzięki temu udostepnisz dashbaord publicznie który nie posiada panelu admin
+
+    
+---
 <a name="english"></a>
 ## <img src="https://flagcdn.com/w20/us.png" width="30"/> English
 
