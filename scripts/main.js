@@ -597,6 +597,9 @@ function updateReflectorActivity(entries) {
         var durTs  = escHtml(String(entry.start_timestamp || 0));
         var durAct = entry.active ? '1' : '0';
         var dur    = formatDuration(entry.duration);
+        var dur = entry.duration_unknown
+            ? '<span class="dur-unknown" title="Talker stop nie znaleziony w logu — prawdopodobnie zerwane połączenie">❓</span>'
+            : formatDuration(entry.duration);
 
         newKeys[cs] = true;
 

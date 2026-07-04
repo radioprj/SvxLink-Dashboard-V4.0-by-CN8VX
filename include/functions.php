@@ -1055,25 +1055,24 @@ function getReflectorActivity(int $max = 50): array {
 
             // Zabezpieczenie przed "zombie talker": jeśli "Talker stop"
             // zaginął w logu (np. utrata połączenia), po 300s przestajemy
-            // pokazywać wpis jako aktywny.
+            // pokazywać wpis jako aktywny. Nie znamy prawdziwego czasu
+            // zakończenia, więc oznaczamy duration jako "nieznane"
+            // zamiast pokazywać rosnącą w nieskończoność liczbę.
             $isZombie = $liveDuration > 300;
 
-            // Skoro nie znamy prawdziwego czasu zakończenia, nie pokazujemy
-            // licznika rosnącego w nieskończoność — zamrażamy go na progu 300s.
-            $displayDuration = $isZombie ? 300 : $liveDuration;
-
             $sessions[] = [
-                'datetime'     => $start['datetime'],
-                'timestamp'    => $start['timestamp'],
-                'callsign'     => $start['callsign'],
-                'callsign_qrz' => $start['callsign_qrz'],
-                'is_gateway'   => $start['is_gateway'],
-                'tg'           => $start['tg'],
-                'tg_name'      => getTGName($start['tg']),
-                'duration'     => $displayDuration,
-                'active'       => !$isZombie,
-                'entry_type'   => $isZombie ? 'rx' : 'tx',
-                'source'       => 'talker',
+                'datetime'         => $start['datetime'],
+                'timestamp'        => $start['timestamp'],
+                'callsign'         => $start['callsign'],
+                'callsign_qrz'     => $start['callsign_qrz'],
+                'is_gateway'       => $start['is_gateway'],
+                'tg'               => $start['tg'],
+                'tg_name'          => getTGName($start['tg']),
+                'duration'         => $liveDuration,
+                'duration_unknown' => $isZombie,
+                'active'           => !$isZombie,
+                'entry_type'       => $isZombie ? 'rx' : 'tx',
+                'source'           => 'talker',
             ];
         }
         $grouped = [];
