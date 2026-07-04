@@ -993,34 +993,6 @@ function parseReflectorLogLine(string $line): ?array {
     ];
 }
 
-function parseConnectedNodesLine(string $line): ?array {
-    if (strpos($line, 'Connected nodes:') === false) return null;
-    $timeInfo = extractLogTimestamp($line);
-    if ($timeInfo === null) return null;
-    if (!preg_match('/Connected nodes:\s*(.+)$/', $line, $m)) return null;
-    $nodes = array_filter(array_map('trim', explode(',', $m[1])));
-    if (empty($nodes)) return null;
-    return [
-        'datetime'  => $timeInfo['datetime'],
-        'timestamp' => $timeInfo['timestamp'],
-        'nodes'     => array_map('strtoupper', $nodes),
-    ];
-}
-
-function getLatestConnectedNodes(array $lines): array {
-    $logPath = resolveLogPath();
-    $cmd = "LC_ALL=C LANG=C grep 'Connected nodes:' " . escapeshellarg($logPath) . " | tail -20";
-    $output = shell_exec($cmd);
-    
-    if (!$output) return [];
-    $lines = explode("\n", trim($output));
-    
-    for ($i = count($lines) - 1; $i >= 0; $i--) {
-        $parsed = parseConnectedNodesLine($lines[$i]);
-        if ($parsed !== null) return $parsed;
-    }
-    return [];
-}
 
 // ============================================================
 // REFLECTOR — ACTIVITÉ (remplace "Derniers appelants")
@@ -1086,6 +1058,10 @@ function getReflectorActivity(int $max = 50): array {
             // pokazywać wpis jako aktywny.
             $isZombie = $liveDuration > 300;
 
+            // Skoro nie znamy prawdziwego czasu zakończenia, nie pokazujemy
+            // licznika rosnącego w nieskończoność — zamrażamy go na progu 300s.
+            $displayDuration = $isZombie ? 300 : $liveDuration;
+
             $sessions[] = [
                 'datetime'     => $start['datetime'],
                 'timestamp'    => $start['timestamp'],
@@ -1094,50 +1070,12 @@ function getReflectorActivity(int $max = 50): array {
                 'is_gateway'   => $start['is_gateway'],
                 'tg'           => $start['tg'],
                 'tg_name'      => getTGName($start['tg']),
-                'duration'     => $liveDuration,
+                'duration'     => $displayDuration,
                 'active'       => !$isZombie,
                 'entry_type'   => $isZombie ? 'rx' : 'tx',
                 'source'       => 'talker',
             ];
         }
-
-        $latestNodes = getLatestConnectedNodes($lines);
-        if (!empty($latestNodes)) {
-            foreach ($latestNodes['nodes'] as $node) {
-                $alreadyPresent = false;
-                foreach ($sessions as $entry) {
-                    if ($entry['callsign'] === $node) { $alreadyPresent = true; break; }
-                }
-                if ($alreadyPresent) continue;
-
-                $fallbackTg = $fallbackTgName = '';
-                foreach ($sessions as $session) {
-                    if ($session['callsign'] === $node && $session['tg'] !== '') {
-                        $fallbackTg = $session['tg']; $fallbackTgName = $session['tg_name']; break;
-                    }
-                }
-                if ($fallbackTg === '') {
-                    foreach ($sessions as $session) {
-                        if ($session['tg'] !== '') { $fallbackTg = $session['tg']; $fallbackTgName = $session['tg_name']; break; }
-                    }
-                }
-
-                $sessions[] = [
-                    'datetime'     => $latestNodes['datetime'],
-                    'timestamp'    => $latestNodes['timestamp'],
-                    'callsign'     => $node,
-                    'callsign_qrz' => stripCallsignSuffix($node),
-                    'is_gateway'   => isGatewayNode($node),
-                    'tg'           => $fallbackTg,
-                    'tg_name'      => $fallbackTgName,
-                    'duration'     => 0,
-                    'active'       => false,
-                    'entry_type'   => '',
-                    'source'       => 'connected_node',
-                ];
-            }
-        }
-
         $grouped = [];
         foreach ($sessions as $session) {
             $key = $session['callsign'] . '|' . $session['tg'];

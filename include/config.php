@@ -15,7 +15,21 @@
 // Définition du fuseau horaire par défaut
 // You can find timezones at: https://www.php.net/manual/en/timezones.php
 // Vous pouvez trouver les fuseaux horaires sur : https://www.php.net/manual/en/timezones.php
-define('TIMEZONE', 'Europe/Warsaw');
+// ========================================
+// TIMEZONE - odczytaj z systemu
+// ========================================
+if (file_exists('/etc/localtime')) {
+    $systemTimezone = readlink('/etc/localtime');
+    if ($systemTimezone !== false) {
+        $timezone = substr($systemTimezone, strpos($systemTimezone, 'zoneinfo/') + 9);
+        date_default_timezone_set($timezone);
+        define('TIMEZONE',$timezone);
+    }
+} else {
+    // Fallback
+    date_default_timezone_set('Europe/Warsaw');
+    define('TIMEZONE', 'Europe/Warsaw');
+}
 
 // ============================================================
 // 2. CHEMINS / PATHS
