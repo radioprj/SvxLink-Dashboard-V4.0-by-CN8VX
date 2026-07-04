@@ -10,7 +10,7 @@ require_once __DIR__ . '/config.php';
 <!-- Credits: CN8VX 2026. -->
 <br><br>
     <div class="fixed-footer">
-        <p>SYSOP of Repeater : <a href="https://www.qrz.com/db/<?php echo $SYSOP; ?>" target="_blank"><?php echo $SYSOP; ?></a> <?php echo $SYSOPNAME; ?> | 
-         SvxLink Dashboard Repeater V2 Developed by <a target="_blank" href="https://github.com/CN8VX">CN8VX</a>. Version <b>4.0</b> © <?php echo date("Y"); ?> All rights reserved.</p>
+        <p>SYSOP of Node : <a href="https://www.qrz.com/db/<?php echo $SYSOP; ?>" target="_blank"><?php echo $SYSOP; ?></a> <?php echo $SYSOPNAME; ?> | 
+         SvxLink Dashboard Node V2 Developed by <a target="_blank" href="https://github.com/CN8VX">CN8VX</a> and SP2ONG. Version <b>4.1</b> © <?php echo date("Y"); ?> All rights reserved.</p>
     </div>
 </footer>

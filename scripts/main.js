@@ -36,11 +36,11 @@ function startRealTimeClock() {
     function updateClock() {
         var now = new Date();
 
-        var timeStr = now.toLocaleTimeString('fr-FR', {
+        var timeStr = now.toLocaleTimeString('en-US', {
             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
 
-        var dateStr = now.toLocaleDateString('fr-FR', {
+        var dateStr = now.toLocaleDateString('en-US', {
             weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
         });
         dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
@@ -56,7 +56,7 @@ function startRealTimeClock() {
 
 function startClock() {
     function tick() {
-        var t = new Date().toLocaleTimeString('fr-FR', {
+        var t = new Date().toLocaleTimeString('en-US', {
             hour: '2-digit', minute: '2-digit', hour12: false
         });
         var el = document.getElementById('header-clock');
@@ -443,11 +443,12 @@ function updateStatus(data) {
         }
     }
 
-    if (data.modules)          updateModules(data.modules);
+    if (data.modules)          updateModules(data.modules, data.active_modules);
     if (data.repeater_runtime) updateRepeaterState(data.repeater_runtime);
 
     if (data.reflector_current_tg !== undefined) updateReflectorCurrentTg(data.reflector_current_tg);
     if (data.reflector_activity)                 updateReflectorActivity(data.reflector_activity);
+    if (data.link_status)                        updateLinkStatus(data.link_status);
     if (data.tg_info)                            updateTgNodeList(data.tg_info);
 }
 
@@ -481,18 +482,20 @@ function updateTgNodeList(tg) {
 //  MODULES
 // ════════════════════════════════════════════════════════
 
-function updateModules(modules) {
+
+function updateModules(modules, activeModules) {
     var el = document.getElementById('modules-live');
     if (!el) return;
     if (!modules.length) {
-        el.innerHTML = '<span class="no-data">Aucun module actif</span>';
+        el.innerHTML = '<span class="module-empty">No loaded modules</span>';
         return;
     }
+    var active = activeModules || [];
     el.innerHTML = modules.map(function(m) {
-        return '<span class="module-badge">' + escHtml(m) + '</span>';
+        var cls = 'module-badge' + (active.indexOf(m) !== -1 ? ' active' : '');
+        return '<span class="' + cls + '">' + escHtml(m) + '</span>';
     }).join('');
 }
-
 
 // ════════════════════════════════════════════════════════
 //  SVXREFLECTOR
@@ -522,18 +525,28 @@ function updateReflectorCurrentTg(currentTg) {
         ? ' <span class="tg-name">' + escHtml(currentTg.tg_name) + '</span>' : '';
     el.innerHTML = escHtml(currentTg.tg) + tgName + dot;
 }
-
+function updateLinkStatus(status) {
+    var el = document.getElementById('link-status-value');
+    if (!el) return;
+    el.textContent = status;
+    el.classList.remove('status-connected', 'status-disconnected');
+    el.classList.add(status === 'Connected' ? 'status-connected' : 'status-disconnected');
+}
 function renderReflectorCallsign(entry) {
     var callsign = entry.callsign || '';
     if (!callsign) return '<span class="no-data">&mdash;</span>';
+
+    var talkIcon = entry.active
+        ? ' <span class="talker-live-icon" title="Currently transmitting">📢</span>'
+        : '';
+
     if (CFG.qrz_enabled && !isGatewayNode(callsign)) {
         return '<a href="' + CFG.qrz_url + encodeURIComponent(entry.callsign_qrz || callsign)
-             + '" target="_blank" rel="noopener" class="callsign-link">' + escHtml(callsign) + '</a>';
+             + '" target="_blank" rel="noopener" class="callsign-link">' + escHtml(callsign) + '</a>' + talkIcon;
     }
     var cls = entry.is_gateway ? 'gateway-name' : '';
-    return '<span class="' + cls + '">' + escHtml(callsign) + '</span>';
+    return '<span class="' + cls + '">' + escHtml(callsign) + '</span>' + talkIcon;
 }
-
 function updateReflectorActivity(entries) {
     var body = document.getElementById('reflector-activity-body');
     if (!body) return;
@@ -790,9 +803,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setInterval(fetchHardwareLive, CFG.refresh * 1000);
 
-    setInterval(fetchEcholink, 10 * 1000);
+    setInterval(fetchEcholink, 30 * 1000);
 
-    setInterval(fetchUptime, 10 * 1000);
+    setInterval(fetchUptime, 30 * 1000);
 
     if (!repeaterFastPollTimer) {
         repeaterFastPollTimer = setInterval(function() {

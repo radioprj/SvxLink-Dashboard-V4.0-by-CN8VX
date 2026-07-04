@@ -80,6 +80,7 @@ $tgmon     = !empty($config['ReflectorLogic']['MONITOR_TGS'])
 
 $tgtmp    = getSVXTGTMP();
 $tgselect = getSVXTGSelect();
+$linkStatus = getSVXRstatus();
 
 // ========================================================
 // ECHOLINK CONFIG

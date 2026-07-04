@@ -15,11 +15,13 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/cache_helper.php';
 
 /* ── helper shell ────────────────────────────────────────────── */
-function hw_cmd(string $cmd): string {
-    $out = @shell_exec('LC_ALL=C ' . $cmd . ' 2>/dev/null');
-    return ($out !== null) ? trim($out) : '';
+function hw_cmd(string $cmd) {
+    return dashboard_cached('hw_' . md5($cmd), 10, function () use ($cmd) {
+        return @shell_exec('LC_ALL=C ' . $cmd . ' 2>/dev/null');
+    });
 }
 
 /* ── CPU usage ───────────────────────────────────────────────── */
@@ -48,7 +50,7 @@ function hw_cpuTemp(): string {
         $r = @file_get_contents($p);
         if ($r !== false) {
             $v = (int)trim($r);
-            if ($v > 0) return number_format($v / 1000.0, 1);
+            if ($v > 0) return number_format($v / 1000.0,1)+CPU_TEMP_OFFSET;
         }
     }
     $o = hw_cmd('vcgencmd measure_temp');

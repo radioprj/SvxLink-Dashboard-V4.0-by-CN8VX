@@ -8,11 +8,20 @@
 */
 require_once __DIR__ . '/include/infosvx.php';
 require_once __DIR__ . '/include/hardware_info.php';
-
 $hw             = getAllHardwareInfo();
 $repeaterData   = getRepeaterStatus();
 $repeaterStatus = $repeaterData['status'];
 $rsDesc         = $repeaterData['description'];
+$activeMods     = getActiveModules();
+
+// Nazwy w MODULES= w svxlink.conf mają prefiks "Module" (np. ModuleParrot),
+// ale w logu i na przyciskach chcemy samo "Parrot".
+$moduleLabels = !empty($MODULES)
+    ? array_map(function ($m) {
+        return trim(preg_replace('/^Module/i', '', trim($m)));
+      }, explode(',', $MODULES))
+    : [];
+
 $hasLogo        = (LOGO_PATH !== '' && file_exists(__DIR__ . '/' . LOGO_PATH));
 
 
@@ -54,7 +63,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SvxLink <?php echo htmlspecialchars($repeaterType ?? ''); ?> Repeater Dashboard - <?php echo htmlspecialchars($CALLSIGN); ?></title>
+    <title>SvxLink <?php echo htmlspecialchars($repeaterType ?? ''); ?> SVX Node Dashboard - <?php echo htmlspecialchars($CALLSIGN); ?></title>
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -82,7 +91,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
 
 <!-- ══ Repeater Status ═════════════════════ -->
     <div class="repeater-status-panel">
-      <div class="panel-label panel-bar"><span class="block-icon">🗼</span>Repeater Status</div>
+      <div class="panel-label panel-bar"><span class="block-icon">🗼</span>TRX Node Status</div>
       <div class="rs-bar">
         <div class="rs-state <?php echo $repeaterStatus === 'tx' ? 'tx' : ($repeaterStatus === 'rx' ? 'rx' : 'listening'); ?> active" id="rs-main">
           <?php if ($repeaterStatus !== 'listening'): ?>
@@ -101,20 +110,19 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
     </div>
 
 <!-- ══ GRID LEFT : Modules actifs ═══════════════════════════ -->
-    <div class="module-panel">
-      <div class="panel-label panel-bar"><span class="block-icon">🔓</span>Active Modules</div>
-      <div class="module-list">
-        <?php if (!empty($MODULES)): ?>
-          <?php foreach (array_map('trim', explode(',', $MODULES)) as $mod): ?>
-            <span class="module-badge"><?php echo htmlspecialchars($mod); ?></span>
+   <div class="module-panel">
+      <div class="panel-label panel-bar"><span class="block-icon">🔓</span>Modules</div>
+      <div class="module-list" id="modules-live">
+        <?php if (!empty($moduleLabels)): ?>
+          <?php foreach ($moduleLabels as $mod): ?>
+            <span class="module-badge<?php echo in_array($mod, $activeMods, true) ? ' active' : ''; ?>"><?php echo htmlspecialchars($mod); ?></span>
           <?php endforeach; ?>
         <?php else: ?>
-          <span class="module-empty">No active modules</span>
+          <span class="module-empty">No loaded modules</span>
         <?php endif; ?>
       </div>
     </div>
   </div>
-
 <!-- ══ GRID MAIN : Uptime / QSO / CPU Temp ══════════════════ -->
   <div class="grid-main">
 
@@ -132,7 +140,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
       <div class="panel-value <?php echo $tempVal; ?>" id="live-cpu-temp">
         <?php echo htmlspecialchars($hw['cpu_temp']); ?>°C
       </div>
-      <div class="panel-sub">CPU for Raspberry Pi</div>
+      <div class="panel-sub">CPU for SBC</div>
     </div>
 
 <!-- Horloge avec Date, Heure et Timezone -->
@@ -251,6 +259,10 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
           <div class="node-row" id="tg-active">
             <span class="node-name">Last Active TG</span>
             <span class="node-ping tg-active"><?php echo htmlspecialchars($tgselect ?: 'No Active TG'); ?></span>
+          </div>
+          <div class="node-row" id="link-status">
+            <span class="node-name">Link Status</span>
+            <span class="node-ping link-status-value <?php echo ($linkStatus === 'Connected') ? 'status-connected' : 'status-disconnected'; ?>" id="link-status-value"><?php echo htmlspecialchars($linkStatus); ?></span>
           </div>
         </div>
       </div>
@@ -422,7 +434,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
 
 <script>
 window.DASH_CONFIG = {
-    refresh:       5,
+    refresh:       8,
     qrz_enabled:   true,
     qrz_url:       'https://www.qrz.com/db/',
     default_theme: '<?php echo htmlspecialchars(DEFAULT_THEME); ?>'

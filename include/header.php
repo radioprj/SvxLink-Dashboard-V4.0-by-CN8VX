@@ -22,7 +22,7 @@
 
           <div>
               <div class="header-titles">SvxLink Dashboard for 
-                  <span class="repeater-type"><?php echo htmlspecialchars($repeaterType ?? ''); ?></span> Repeater :
+                  <span class="repeater-type"><?php echo htmlspecialchars($repeaterType ?? ''); ?></span> Node :
                   <span class="header-callsign"><?php echo htmlspecialchars($CALLSIGN); ?></span>
               </div>
               <div class="header-subtitle">

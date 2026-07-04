@@ -52,19 +52,10 @@ $activeNav = $activeNav ?? 'dashboard';
             ====================================================================== --> 
             
             <li>
-                <a href="http://refsvx.dmr-maroc.com/" target="_blank" rel="noopener"
+                <a href="http://dashboard.fm-poland.pl/" target="_blank" rel="noopener"
                    class="nav-link nav-link-ext">SVXReflector</a>
             </li>
 
-            <li>
-                <a href="http://free.dmr-maroc.com/allmon3/" target="_blank" rel="noopener"
-                   class="nav-link nav-link-ext">AllStarLink HUB</a>
-            </li>
-
-            <li>
-                <a href="http://6041.adn.systems/" target="_blank" rel="noopener"
-                   class="nav-link nav-link-ext">ADN MAROC</a>
-            </li>
 
         </ul>
     </div>

@@ -540,7 +540,13 @@ canvas#specCanvas { width: 100%; height: 50px; display: block; }
     font-size: 12px;
     font-family: 'Share Tech Mono', monospace;
 }
-
+.module-badge.active {
+    background: rgba(46, 204, 113, 0.22);
+    border-color: #2ecc71;
+    color: #2ecc71;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.45);
+    font-weight: bold;
+}
 .module-empty {
     color: var(--rf-muted);
     font-size: 12px;
@@ -584,6 +590,17 @@ canvas#specCanvas { width: 100%; height: 50px; display: block; }
     font-family: 'Share Tech Mono', monospace;
 }
 
+.talker-live-icon {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--rf-tx);
+    animation: talkerPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes talkerPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+}
 /* ─── 13. BADGES ─────────────────────────────────────────── */
 .badge {
     font-size: 10px;
@@ -862,6 +879,15 @@ canvas#specCanvas { width: 100%; height: 50px; display: block; }
 .tg-default { color: var(--rf-tg-default); }
 .tg-monitor { color: var(--rf-tg-monitor); }
 .tg-active { color: var(--rf-tg-active); }
+
+.status-connected {
+    color: var(--rf-green);
+    font-weight: bold;
+}
+.status-disconnected {
+    color: var(--rf-red);
+    font-weight: bold;
+}
 
 /* ─── 21. REPEATER STATUS PANEL ──────────────────────────── */
 .rs-bar {

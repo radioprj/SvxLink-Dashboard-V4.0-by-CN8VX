@@ -7,6 +7,8 @@
 * fully designed and developed by CN8VX © 2026.
 */
 
+require_once __DIR__ . '/cache_helper.php';
+
 // ============================================================
 // Encodage UTF-8 pour la lecture des fichiers
 // ============================================================
@@ -31,102 +33,95 @@ function format_uptime(int $seconds): string {
 // ============================================================
 // SVXLINK LOGS
 // ============================================================
-
 function getSVXLog(): array {
-    $logLines = [];
-
-    $paths = [
-        SVXLINK_LOG,
-        SVXLINK_LOG . ".1"
-    ];
-
-    foreach ($paths as $path) {
-        if (file_exists($path)) {
-            $cmd = "LC_ALL=C LANG=C tail -10000 " . escapeshellarg($path) .
-                   " | egrep -a -h 'Talker start on|Talker stop on'";
-            $output = shell_exec($cmd);
-            if (!empty($output)) {
-                $logLines = array_merge($logLines, explode("\n", $output));
+    return dashboard_cached('svx_log', 5, function () {
+        $logLines = [];
+        $paths = [SVXLINK_LOG, SVXLINK_LOG . ".1"];
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                $cmd = "LC_ALL=C LANG=C tail -10000 " . escapeshellarg($path) .
+                       " | egrep -a -h 'Talker start on|Talker stop on'";
+                $output = shell_exec($cmd);
+                if (!empty($output)) {
+                    $logLines = array_merge($logLines, explode("\n", $output));
+                }
             }
         }
-    }
-
-    return array_slice($logLines, -500);
+        return array_slice($logLines, -500);
+    });
 }
-
 
 function getSVXStatusLog(): array {
-    $logLines = [];
-
-    $paths = [
-        SVXLINK_LOG,
-        SVXLINK_LOG . ".1"
-    ];
-
-    foreach ($paths as $path) {
-        if (file_exists($path)) {
-            $cmd = "LC_ALL=C LANG=C tail -10000 " . escapeshellarg($path) .
-                   " | egrep -a -h 'EchoLink QSO|ransmitter|Selecting'";
-            $output = shell_exec($cmd);
-            if (!empty($output)) {
-                $logLines = array_merge($logLines, explode("\n", $output));
+    return dashboard_cached('svx_status_log', 5, function () {
+        $logLines = [];
+        $paths = [SVXLINK_LOG, SVXLINK_LOG . ".1"];
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                $cmd = "LC_ALL=C LANG=C tail -10000 " . escapeshellarg($path) .
+                       " | egrep -a -h 'EchoLink QSO|ransmitter|Selecting'";
+                $output = shell_exec($cmd);
+                if (!empty($output)) {
+                    $logLines = array_merge($logLines, explode("\n", $output));
+                }
             }
         }
-    }
-
-    return array_slice($logLines, -250);
+        return array_slice($logLines, -250);
+    });
 }
-
 
 function getSVXRstatus(): string {
-    $patterns = "Authentication|Connection established|Heartbeat timeout|No route to host|Connection refused|Connection timed out|Locally ordered disconnect|Deactivating link|Activating link";
+    return dashboard_cached('svx_r_status', 5, function () {
+        $connectPatterns = ['Authentication OK', 'Connection established', 'Activating link'];
+        $disconnectPatterns = [
+            'Heartbeat timeout', 'No route to host', 'Connection refused',
+            'Connection timed out', 'Locally ordered disconnect',
+            'Deactivating link', '"ReflectorLogic". Skipping',
+        ];
+        $allPatterns = array_merge($connectPatterns, $disconnectPatterns);
 
-    $paths = [
-        SVXLINK_LOG,
-        SVXLINK_LOG . ".1"
-    ];
+        $paths = [SVXLINK_LOG, SVXLINK_LOG . '.1'];
 
-    foreach ($paths as $path) {
-        if (!file_exists($path)) continue;
+        foreach ($paths as $path) {
+            if (!file_exists($path) || !is_readable($path)) continue;
 
-        $cmd = "LC_ALL=C LANG=C tail -10000 " . escapeshellarg($path) .
-               " | egrep -a -h '$patterns' | tail -1";
-        $line = shell_exec($cmd);
+            $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines === false) continue;
 
-        if (!empty($line)) {
-            if (preg_match('/Authentication OK|Connection established|Activating link/', $line)) {
-                return 'Connected';
-            }
-            if (preg_match('/timeout|No route|refused|disconnect/', $line)) {
-                return 'Not connected';
+            for ($i = count($lines) - 1; $i >= 0; $i--) {
+                $line = $lines[$i];
+
+                $matched = false;
+                foreach ($allPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) { $matched = true; break; }
+                }
+                if (!$matched) continue;
+
+                foreach ($connectPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) return 'Connected';
+                }
+                foreach ($disconnectPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) return 'Disconnected';
+                }
             }
         }
-    }
 
-    return 'No status';
+        return 'No status';
+    });
 }
-
 // ============================================================
 // REPEATER STATUS (TX/RX/LISTENING)
 // ============================================================
-
 function getRepeaterStatus(): array {
-    $logPath = resolveLogPath();
-
-    if (!is_readable($logPath)) {
-        return [
-            'status'      => 'listening',
-            'description' => 'Listening - Log file not found'
-        ];
-    }
-
-    $cmd    = "LC_ALL=C LANG=C tail -200 " . escapeshellarg($logPath);
-    $output = trim(shell_exec($cmd) ?? '');
-
-    if ($output === '') {
-        return ['status' => 'listening', 'description' => 'Listening - No log data'];
-    }
-
+    return dashboard_cached('repeater_status', 2, function () {
+        $logPath = resolveLogPath();
+        if (!is_readable($logPath)) {
+            return ['status' => 'listening', 'description' => 'Listening - Log file not found'];
+        }
+        $cmd    = "LC_ALL=C LANG=C tail -200 " . escapeshellarg($logPath);
+        $output = trim(shell_exec($cmd) ?? '');
+        if ($output === '') {
+            return ['status' => 'listening', 'description' => 'Listening - No log data'];
+        }
     $lines = explode("\n", $output);
 
     $status           = 'listening';
@@ -202,21 +197,22 @@ function getRepeaterStatus(): array {
         }
     }
 
-    return ['status' => $status, 'description' => $description];
+        return ['status' => $status, 'description' => $description];
+    });
 }
-
 // ============================================================
 // ECHOLINK
 // ============================================================
 
 function getEchoLog(): array {
-    $path = SVXLINK_LOG;
-    if (!file_exists($path)) return [];
+    return dashboard_cached('echo_log', 5, function () {
+        $path = SVXLINK_LOG;
+        if (!file_exists($path)) return [];
 
-    $output = shell_exec("grep -a -h 'EchoLink QSO' " . escapeshellarg($path));
-    return !empty($output) ? array_slice(explode("\n", $output), -500) : [];
+        $output = shell_exec("grep -a -h 'EchoLink QSO' " . escapeshellarg($path));
+        return !empty($output) ? array_slice(explode("\n", $output), -500) : [];
+    });
 }
-
 
 function getConnectedEcholink(array $echolog): array {
     $users = [];
@@ -247,38 +243,34 @@ function getConnectedEcholink(array $echolog): array {
 }
 
 function getEchoLinkTX(): string {
-    $path = SVXLINK_LOG;
-    if (!file_exists($path)) return '';
+    return dashboard_cached('echolink_tx', 5, function () {
+        $path = SVXLINK_LOG;
+        if (!file_exists($path)) return '';
 
-    $line = shell_exec("tail -10000 " . escapeshellarg($path) .
-                       " | egrep -a -h '### EchoLink' | tail -1");
+        $line = shell_exec("tail -10000 " . escapeshellarg($path) .
+                           " | egrep -a -h '### EchoLink' | tail -1");
 
-    if ($line && strpos($line, "talker start") !== false) {
-        return trim(substr($line, strpos($line, "start") + 6, 12));
-    }
-
-    return '';
+        if ($line && strpos($line, "talker start") !== false) {
+            return trim(substr($line, strpos($line, "start") + 6, 12));
+        }
+        return '';
+    });
 }
-
 // ============================================================
 // TG / REFLECTOR
 // ============================================================
-
 function getSVXTGSelect(): string {
-    $path = SVXLINK_LOG;
-    if (!file_exists($path)) return '';
-
-    $line = shell_exec("tail -10000 " . escapeshellarg($path) .
-                       " | egrep -a -h 'Selecting' | tail -1");
-
-    if ($line && strpos($line, "TG #") !== false) {
-        return trim(substr($line, strpos($line, "#") + 1, 12));
-    }
-
-    return '';
+    return dashboard_cached('svx_tg_select', 5, function () {
+        $path = SVXLINK_LOG;
+        if (!file_exists($path)) return '';
+        $line = shell_exec("tail -10000 " . escapeshellarg($path) .
+                           " | egrep -a -h 'Selecting' | tail -1");
+        if ($line && strpos($line, "TG #") !== false) {
+            return trim(substr($line, strpos($line, "#") + 1, 12));
+        }
+        return '';
+    });
 }
-
-
 function getSVXTGTMP(): string {
     $path = SVXLINK_LOG;
     if (!file_exists($path)) return '';
@@ -296,12 +288,12 @@ function getSVXTGTMP(): string {
 // ============================================================
 // UTILS
 // ============================================================
-
 function isProcessRunning(string $name): bool {
-    $output = shell_exec("pgrep -x " . escapeshellarg($name));
-    return !empty(trim($output ?? ''));
+    return dashboard_cached('proc_running_' . $name, 5, function () use ($name) {
+        $output = shell_exec("pgrep -x " . escapeshellarg($name));
+        return !empty(trim($output ?? ''));
+    });
 }
-
 
 function parse_svxlink_config(string $filePath): array {
     $config = [];
@@ -330,22 +322,74 @@ function parse_svxlink_config(string $filePath): array {
 // ============================================================
 // STATUT SVXLINK (systemctl)
 // ============================================================
-
 function getSvxlinkStatus(): string {
-    $out = shell_exec('systemctl is-active svxlink 2>/dev/null');
-    return trim($out !== null ? $out : 'unknown');
+    return dashboard_cached('svx_status', 10, function () {
+        $out = shell_exec('systemctl is-active svxlink 2>/dev/null');
+        return trim($out !== null ? $out : 'unknown');
+    });
 }
-
 function getSvxlinkUptime(): string {
-    $out = shell_exec('systemctl show svxlink --property=ActiveEnterTimestamp 2>/dev/null');
-    if (!$out) return '';
-    if (!preg_match('/ActiveEnterTimestamp=(.+)/', trim($out), $m)) return '';
-    if (trim($m[1]) === '') return '';
-    $start = strtotime($m[1]);
-    if (!$start || $start <= 0) return '';
-    return format_uptime((int)(time() - $start));
+    return dashboard_cached('svx_uptime', 10, function () {
+        $out = shell_exec('systemctl show svxlink --property=ActiveEnterTimestamp 2>/dev/null');
+        if (!$out) return '';
+        if (!preg_match('/ActiveEnterTimestamp=(.+)/', trim($out), $m)) return '';
+        if (trim($m[1]) === '') return '';
+        $start = strtotime($m[1]);
+        if (!$start || $start <= 0) return '';
+        return format_uptime((int)(time() - $start));
+    });
+}
+// ============================================================
+// AKTYWNE MODUŁY (na podstawie logu, tylko od bieżącego startu svxlink)
+// ============================================================
+
+function getSvxlinkStartTimestamp(): int {
+    return dashboard_cached('svx_start_ts', 10, function () {
+        $out = shell_exec('systemctl show svxlink --property=ActiveEnterTimestamp 2>/dev/null');
+        if (!$out) return 0;
+        if (!preg_match('/ActiveEnterTimestamp=(.+)/', trim($out), $m)) return 0;
+        $val = trim($m[1]);
+        if ($val === '') return 0;
+        $ts = strtotime($val);
+        return $ts !== false ? $ts : 0;
+    });
 }
 
+function getActiveModules(): array {
+    return dashboard_cached('svx_active_modules', 4, function () {
+        $path = SVXLINK_LOG;
+        if (!file_exists($path)) return [];
+
+        // Bierzemy pod uwagę tylko wpisy PO ostatnim starcie svxlink —
+        // dzięki temu stary "Activating module X" sprzed restartu
+        // (bez towarzyszącego Deactivating) nie pokaże modułu jako
+        // aktywnego, mimo że proces już dawno nie działa.
+        $startTs = getSvxlinkStartTimestamp();
+
+        $output = shell_exec("LC_ALL=C LANG=C tail -3000 " . escapeshellarg($path) .
+                              " | egrep -a -h 'Activating module|Deactivating module'");
+        if (empty($output)) return [];
+
+        $state = []; // nazwa_modulu => true/false (aktywny/nieaktywny)
+
+        foreach (explode("\n", $output) as $line) {
+            if (trim($line) === '') continue;
+
+            $parsed = extractLogTimestamp($line);
+            if ($startTs > 0 && $parsed !== null && $parsed['timestamp'] < $startTs) {
+                continue; // wpis sprzed obecnego uruchomienia svxlink
+            }
+
+            if (preg_match('/Activating module\s+([A-Za-z0-9_]+)/', $line, $m)) {
+                $state[$m[1]] = true;
+            } elseif (preg_match('/Deactivating module\s+([A-Za-z0-9_]+)/', $line, $m)) {
+                $state[$m[1]] = false;
+            }
+        }
+
+        return array_keys(array_filter($state));
+    });
+}
 // ============================================================
 // ENDPOINT JSON — Uptime SvxLink
 // URL : include/functions.php?uptime_json=1
@@ -397,34 +441,38 @@ if (isset($_GET['echolink_json'])) {
     header('Cache-Control: no-store, no-cache');
     header('X-Content-Type-Options: nosniff');
 
-    $elCallsign  = '';
-    $elSysopName = '';
-    $elLocation  = '';
-    $elUsers     = [];
+    $elResponse = dashboard_cached('endpoint_json_echolink', 5, function () {
+        $elCallsign  = '';
+        $elSysopName = '';
+        $elLocation  = '';
+        $elUsers     = [];
 
-    $echolinkConfPath = '/etc/svxlink/svxlink.d/ModuleEchoLink.conf';
-    if (file_exists($echolinkConfPath)) {
-        $elConfig    = parse_svxlink_config($echolinkConfPath);
-        $elCallsign  = $elConfig['ModuleEchoLink']['CALLSIGN']  ?? '';
-        $elSysopName = $elConfig['ModuleEchoLink']['SYSOPNAME'] ?? '';
-        $elLocation  = $elConfig['ModuleEchoLink']['LOCATION']  ?? '';
-    }
+        $echolinkConfPath = '/etc/svxlink/svxlink.d/ModuleEchoLink.conf';
+        if (file_exists($echolinkConfPath)) {
+            $elConfig    = parse_svxlink_config($echolinkConfPath);
+            $elCallsign  = $elConfig['ModuleEchoLink']['CALLSIGN']  ?? '';
+            $elSysopName = $elConfig['ModuleEchoLink']['SYSOPNAME'] ?? '';
+            $elLocation  = $elConfig['ModuleEchoLink']['LOCATION']  ?? '';
+        }
 
-    if (isProcessRunning('svxlink')) {
-        $log     = getEchoLog();
-        $elUsers = getConnectedEcholink($log);
-    }
+        if (isProcessRunning('svxlink')) {
+            $log     = getEchoLog();
+            $elUsers = getConnectedEcholink($log);
+        }
 
-    $elCallsignQrz = preg_replace('/-[LR]$/i', '', $elCallsign);
+        $elCallsignQrz = preg_replace('/-[LR]$/i', '', $elCallsign);
 
-    echo json_encode([
-        'callsign'        => $elCallsign,
-        'callsign_qrz'    => $elCallsignQrz,
-        'sysop'           => $elSysopName,
-        'location'        => $elLocation,
-        'connected_nodes' => $elUsers,
-        'connected_count' => count($elUsers),
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return [
+            'callsign'        => $elCallsign,
+            'callsign_qrz'    => $elCallsignQrz,
+            'sysop'           => $elSysopName,
+            'location'        => $elLocation,
+            'connected_nodes' => $elUsers,
+            'connected_count' => count($elUsers),
+        ];
+    });
+
+    echo json_encode($elResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     exit;
 }
@@ -477,10 +525,11 @@ function getTGName(string $tg): string {
     static $tgdb = null;
 
     if ($tgdb === null) {
-        $path = __DIR__ . '/talkgroups.php';
+        $path = __DIR__ . '/talkgroups.json';
         if (is_readable($path)) {
-            require_once $path;
-            $tgdb = isset($tgdb_array) && is_array($tgdb_array) ? $tgdb_array : [];
+            $raw     = file_get_contents($path);
+            $decoded = json_decode($raw, true);
+            $tgdb    = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
         } else {
             $tgdb = [];
         }
@@ -488,7 +537,6 @@ function getTGName(string $tg): string {
 
     return $tgdb[trim($tg)] ?? '';
 }
-
 // ============================================================
 // REFLECTOR — PARSING TIMESTAMP
 // ============================================================
@@ -985,122 +1033,129 @@ function isSVXReflectorActive(array $conf): bool {
 }
 
 function getReflectorActivity(int $max = 50): array {
-    $logPath = resolveLogPath();
-    if (!is_readable($logPath)) return [];
-    
-    $cmd = "LC_ALL=C LANG=C cat " . escapeshellarg($logPath);
-    $content = shell_exec($cmd);
-    
-    if (!$content) return [];
-    $lines = explode("\n", $content);
-    
-    $pending  = [];
-    $sessions = [];
+    return dashboard_cached('reflector_activity_' . $max, 4, function () use ($max) {
+        $logPath = resolveLogPath();
+        if (!is_readable($logPath)) return [];
 
-    foreach ($lines as $line) {
-        $parsed = parseReflectorLogLine($line);
-        if ($parsed === null) continue;
+        $cmd = "LC_ALL=C LANG=C tail -3000 " . escapeshellarg($logPath);
+        $content = shell_exec($cmd);
 
-        $key = $parsed['callsign'] . '_' . $parsed['tg'];
+        if (!$content) return [];
+        $lines = explode("\n", $content);
 
-        if ($parsed['type'] === 'start') {
-            $pending[$key] = $parsed;
-            continue;
-        }
+        $pending  = [];
+        $sessions = [];
 
-        if (!isset($pending[$key])) continue;
+        foreach ($lines as $line) {
+            $parsed = parseReflectorLogLine($line);
+            if ($parsed === null) continue;
 
-        $start    = $pending[$key];
-        $duration = max(0, $parsed['timestamp'] - $start['timestamp']);
+            $key = $parsed['callsign'] . '_' . $parsed['tg'];
 
-        $sessions[] = [
-            'datetime'     => $start['datetime'],
-            'timestamp'    => $start['timestamp'],
-            'callsign'     => $start['callsign'],
-            'callsign_qrz' => $start['callsign_qrz'],
-            'is_gateway'   => $start['is_gateway'],
-            'tg'           => $start['tg'],
-            'tg_name'      => getTGName($start['tg']),
-            'duration'     => $duration,
-            'active'       => false,
-            'entry_type'   => 'rx',
-            'source'       => 'talker',
-        ];
-
-        unset($pending[$key]);
-    }
-
-    foreach ($pending as $start) {
-        $sessions[] = [
-            'datetime'     => $start['datetime'],
-            'timestamp'    => $start['timestamp'],
-            'callsign'     => $start['callsign'],
-            'callsign_qrz' => $start['callsign_qrz'],
-            'is_gateway'   => $start['is_gateway'],
-            'tg'           => $start['tg'],
-            'tg_name'      => getTGName($start['tg']),
-            'duration'     => max(0, time() - $start['timestamp']),
-            'active'       => true,
-            'entry_type'   => 'tx',
-            'source'       => 'talker',
-        ];
-    }
-
-    $latestNodes = getLatestConnectedNodes($lines);
-    if (!empty($latestNodes)) {
-        foreach ($latestNodes['nodes'] as $node) {
-            $alreadyPresent = false;
-            foreach ($sessions as $entry) {
-                if ($entry['callsign'] === $node) { $alreadyPresent = true; break; }
+            if ($parsed['type'] === 'start') {
+                $pending[$key] = $parsed;
+                continue;
             }
-            if ($alreadyPresent) continue;
 
-            $fallbackTg = $fallbackTgName = '';
-            foreach ($sessions as $session) {
-                if ($session['callsign'] === $node && $session['tg'] !== '') {
-                    $fallbackTg = $session['tg']; $fallbackTgName = $session['tg_name']; break;
-                }
-            }
-            if ($fallbackTg === '') {
-                foreach ($sessions as $session) {
-                    if ($session['tg'] !== '') { $fallbackTg = $session['tg']; $fallbackTgName = $session['tg_name']; break; }
-                }
-            }
+            if (!isset($pending[$key])) continue;
+
+            $start    = $pending[$key];
+            $duration = max(0, $parsed['timestamp'] - $start['timestamp']);
 
             $sessions[] = [
-                'datetime'     => $latestNodes['datetime'],
-                'timestamp'    => $latestNodes['timestamp'],
-                'callsign'     => $node,
-                'callsign_qrz' => stripCallsignSuffix($node),
-                'is_gateway'   => isGatewayNode($node),
-                'tg'           => $fallbackTg,
-                'tg_name'      => $fallbackTgName,
-                'duration'     => 0,
+                'datetime'     => $start['datetime'],
+                'timestamp'    => $start['timestamp'],
+                'callsign'     => $start['callsign'],
+                'callsign_qrz' => $start['callsign_qrz'],
+                'is_gateway'   => $start['is_gateway'],
+                'tg'           => $start['tg'],
+                'tg_name'      => getTGName($start['tg']),
+                'duration'     => $duration,
                 'active'       => false,
-                'entry_type'   => '',
-                'source'       => 'connected_node',
+                'entry_type'   => 'rx',
+                'source'       => 'talker',
+            ];
+
+            unset($pending[$key]);
+        }
+        foreach ($pending as $start) {
+            $liveDuration = max(0, time() - $start['timestamp']);
+
+            // Zabezpieczenie przed "zombie talker": jeśli "Talker stop"
+            // zaginął w logu (np. utrata połączenia), po 300s przestajemy
+            // pokazywać wpis jako aktywny.
+            $isZombie = $liveDuration > 300;
+
+            $sessions[] = [
+                'datetime'     => $start['datetime'],
+                'timestamp'    => $start['timestamp'],
+                'callsign'     => $start['callsign'],
+                'callsign_qrz' => $start['callsign_qrz'],
+                'is_gateway'   => $start['is_gateway'],
+                'tg'           => $start['tg'],
+                'tg_name'      => getTGName($start['tg']),
+                'duration'     => $liveDuration,
+                'active'       => !$isZombie,
+                'entry_type'   => $isZombie ? 'rx' : 'tx',
+                'source'       => 'talker',
             ];
         }
-    }
 
-    $grouped = [];
-    foreach ($sessions as $session) {
-        $key = $session['callsign'] . '|' . $session['tg'];
-        if (!isset($grouped[$key])) { $grouped[$key] = $session; continue; }
-        if ($session['active'] && !$grouped[$key]['active']) { $grouped[$key] = $session; continue; }
-        if ($session['timestamp'] > $grouped[$key]['timestamp']) $grouped[$key] = $session;
-    }
+        $latestNodes = getLatestConnectedNodes($lines);
+        if (!empty($latestNodes)) {
+            foreach ($latestNodes['nodes'] as $node) {
+                $alreadyPresent = false;
+                foreach ($sessions as $entry) {
+                    if ($entry['callsign'] === $node) { $alreadyPresent = true; break; }
+                }
+                if ($alreadyPresent) continue;
 
-    $result = array_values($grouped);
+                $fallbackTg = $fallbackTgName = '';
+                foreach ($sessions as $session) {
+                    if ($session['callsign'] === $node && $session['tg'] !== '') {
+                        $fallbackTg = $session['tg']; $fallbackTgName = $session['tg_name']; break;
+                    }
+                }
+                if ($fallbackTg === '') {
+                    foreach ($sessions as $session) {
+                        if ($session['tg'] !== '') { $fallbackTg = $session['tg']; $fallbackTgName = $session['tg_name']; break; }
+                    }
+                }
 
-    usort($result, static function (array $a, array $b): int {
-        if ($a['active'] !== $b['active']) return $a['active'] ? -1 : 1;
-        return $b['timestamp'] <=> $a['timestamp'];
+                $sessions[] = [
+                    'datetime'     => $latestNodes['datetime'],
+                    'timestamp'    => $latestNodes['timestamp'],
+                    'callsign'     => $node,
+                    'callsign_qrz' => stripCallsignSuffix($node),
+                    'is_gateway'   => isGatewayNode($node),
+                    'tg'           => $fallbackTg,
+                    'tg_name'      => $fallbackTgName,
+                    'duration'     => 0,
+                    'active'       => false,
+                    'entry_type'   => '',
+                    'source'       => 'connected_node',
+                ];
+            }
+        }
+
+        $grouped = [];
+        foreach ($sessions as $session) {
+            $key = $session['callsign'] . '|' . $session['tg'];
+            if (!isset($grouped[$key])) { $grouped[$key] = $session; continue; }
+            if ($session['active'] && !$grouped[$key]['active']) { $grouped[$key] = $session; continue; }
+            if ($session['timestamp'] > $grouped[$key]['timestamp']) $grouped[$key] = $session;
+        }
+
+        $result = array_values($grouped);
+
+        usort($result, static function (array $a, array $b): int {
+            if ($a['active'] !== $b['active']) return $a['active'] ? -1 : 1;
+            return $b['timestamp'] <=> $a['timestamp'];
+        });
+
+        return array_slice($result, 0, $max);
     });
-
-    return array_slice($result, 0, $max);
 }
-
 
 // ============================================================
 // ENDPOINT JSON — Données principales du tableau de bord
@@ -1118,48 +1173,54 @@ if (isset($_GET['json'])) {
     header('Cache-Control: no-store, no-cache');
     header('X-Content-Type-Options: nosniff');
 
-    $rfConf   = parse_svxlink_config(SVXLINK_CONFIG);
-    $rfActive = isSVXReflectorActive($rfConf);
+    $response = dashboard_cached('endpoint_json_main', 4, function () {
+        $rfConf   = parse_svxlink_config(SVXLINK_CONFIG);
+        $rfActive = isSVXReflectorActive($rfConf);
 
-    $ctcss   = '';
-    $modules = [];
-    foreach (['SimplexLogic', 'RepeaterLogic'] as $logic) {
-        if (!empty($rfConf[$logic]['REPORT_CTCSS'])) {
-            $ctcss = $rfConf[$logic]['REPORT_CTCSS'];
+        $ctcss   = '';
+        $modules = [];
+        foreach (['SimplexLogic', 'RepeaterLogic'] as $logic) {
+            if (!empty($rfConf[$logic]['REPORT_CTCSS'])) {
+                $ctcss = $rfConf[$logic]['REPORT_CTCSS'];
+            }
+            if (!empty($rfConf[$logic]['MODULES'])) {
+                $modules = array_map(function ($m) {
+                    return trim(preg_replace('/^Module/i', '', trim($m)));
+                }, explode(',', $rfConf[$logic]['MODULES']));
+            }
         }
-        if (!empty($rfConf[$logic]['MODULES'])) {
-            $modules = array_map('trim', explode(',', $rfConf[$logic]['MODULES']));
-        }
-    }
 
-    $currentTg     = getSVXTGSelect();
-    $repeaterState = getRepeaterStatus();
+        $currentTg     = getSVXTGSelect();
+        $repeaterState = getRepeaterStatus();
 
-    $tgDefault = $rfConf['ReflectorLogic']['DEFAULT_TG']  ?? '';
-    $tgMonList = !empty($rfConf['ReflectorLogic']['MONITOR_TGS'])
-        ? array_map('trim', explode(',', $rfConf['ReflectorLogic']['MONITOR_TGS']))
-        : [];
-    $tgTmp     = getSVXTGTMP();
+        $tgDefault = $rfConf['ReflectorLogic']['DEFAULT_TG']  ?? '';
+        $tgMonList = !empty($rfConf['ReflectorLogic']['MONITOR_TGS'])
+            ? array_map('trim', explode(',', $rfConf['ReflectorLogic']['MONITOR_TGS']))
+            : [];
+        $tgTmp     = getSVXTGTMP();
 
-    $response = [
-        'svx_status'           => getSvxlinkStatus(),
-        'svx_uptime'           => getSvxlinkUptime(),
-        'ctcss'                => $ctcss,
-        'modules'              => $modules,
-        'repeater_runtime'     => $repeaterState,
-        'reflector_activity'   => $rfActive ? getReflectorActivity(50) : [],
-        'reflector_current_tg' => [
-            'tg'      => $currentTg,
-            'tg_name' => $currentTg !== '' ? getTGName($currentTg) : '',
-            'active'  => $repeaterState['status'] === 'tx',
-        ],
-        'tg_info' => [
-            'default'  => $tgDefault,
-            'monitor'  => $tgMonList,
-            'tmp'      => $tgTmp,
-            'selected' => $currentTg,
-        ],
-    ];
+        return [
+            'svx_status'           => getSvxlinkStatus(),
+            'svx_uptime'           => getSvxlinkUptime(),
+            'active_modules'       => getActiveModules(),
+            'link_status'          => getSVXRstatus(),
+            'ctcss'                => $ctcss,
+            'modules'              => $modules,
+            'repeater_runtime'     => $repeaterState,
+            'reflector_activity'   => $rfActive ? getReflectorActivity(50) : [],
+            'reflector_current_tg' => [
+                'tg'      => $currentTg,
+                'tg_name' => $currentTg !== '' ? getTGName($currentTg) : '',
+                'active'  => $repeaterState['status'] === 'tx',
+            ],
+            'tg_info' => [
+                'default'  => $tgDefault,
+                'monitor'  => $tgMonList,
+                'tmp'      => $tgTmp,
+                'selected' => $currentTg,
+            ],
+        ];
+    });
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
