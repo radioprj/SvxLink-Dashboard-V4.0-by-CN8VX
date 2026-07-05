@@ -30,7 +30,7 @@ $totalNodes     = count($connectedNodes);
 <?php $activeNav = 'nodes'; include __DIR__ . '/include/navbar.php'; ?>
 
 <div class="module-panel" style="margin: 20px;">
-    <div class="panel-label panel-bar"><span class="block-icon">🌐</span>Connected Nodes (<?php echo $totalNodes; ?>)</div>
+    <div class="panel-label panel-bar"><span class="block-icon">🌐</span>Connected Nodes to SVXReflector(<?php echo $totalNodes; ?>)</div>
     <div class="module-list" id="nodes-live" style="padding:20px 20px;">
         <?php if (!empty($connectedNodes)): ?>
             <?php foreach ($connectedNodes as $node): ?>
