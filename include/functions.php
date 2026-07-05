@@ -1091,7 +1091,7 @@ function getReflectorActivity(int $max = 50): array {
         $logPath = resolveLogPath();
         if (!is_readable($logPath)) return [];
 
-        $cmd = "LC_ALL=C LANG=C tail -3000 " . escapeshellarg($logPath);
+        $cmd = "LC_ALL=C LANG=C tail -5000 " . escapeshellarg($logPath);
         $content = shell_exec($cmd);
 
         if (!$content) return [];
