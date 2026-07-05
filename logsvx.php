@@ -7,6 +7,7 @@
 
 require_once __DIR__ . '/include/config.php';
 require_once __DIR__ . '/include/functions.php';
+
 date_default_timezone_set(TIMEZONE);
 
 if (isset($_GET['log_json'])) {
@@ -254,41 +255,8 @@ function _rowClass(string $type): string {
 </head>
 <body>
 <?php $activeNav = 'activity'; include __DIR__ . '/include/navbar.php'; ?> 
+<?php include __DIR__ . '/include/header.php'; ?>
 <div id="root" class="dark-bg">
-
-  <!-- ══ TOP BAR ══════════════════════════════════════════════ -->
-  <div class="top-bar">
-    <div class="header-main">
-        <?php if ($hasLogo): ?>
-            <img src="<?php echo htmlspecialchars(LOGO_PATH); ?>"
-                 alt="Logo <?php echo htmlspecialchars($CALLSIGN); ?>"
-                 class="header-logo">
-        <?php else: ?>
-            <div class="header-logo-text"><?php echo htmlspecialchars($CALLSIGN); ?></div>
-        <?php endif; ?>
-        <div>
-            <div class="header-titles">SvxLink Logs Viewer for Repeater :
-                <span class="header-callsign"><?php echo htmlspecialchars($CALLSIGN); ?></span>
-            </div>
-            <div class="header-subtitle">
-                <span class="block-icon">📂</span><?php echo htmlspecialchars(SVXLINK_LOG); ?>
-                &nbsp;|&nbsp;
-                <span class="block-icon">🕒</span><?php echo htmlspecialchars(TIMEZONE); ?>
-            </div>
-        </div>
-    </div>
-    <div class="status-row">
-        <div id="statusLabel" class="status-label <?php
-            echo $svxStatus === 'active' ? 'active' : ($svxStatus === 'inactive' ? 'inactive' : 'failed'); ?>">
-            <span id="rxdot" class="status-dot"></span>
-            <span id="statusText"><?php echo strtoupper($svxStatus ?: 'UNKNOWN'); ?></span>
-        </div>
-        <div class="header-clock" id="header-clock">--:--</div>
-        <button class="theme-btn" id="theme-toggle" title="Change Theme" aria-label="Toggle dark/light theme">
-            <span class="theme-icon">🌙</span>
-        </button>
-    </div>
-  </div>
 
   <!-- ── Toolbar ─────────────────────────────────────────────── -->
   <div class="log-page-wrap">

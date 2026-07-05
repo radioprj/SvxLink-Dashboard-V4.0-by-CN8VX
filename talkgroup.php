@@ -10,9 +10,9 @@
  * Any changes made to this file are automatically reflected when the page is refreshed
 */
 require_once __DIR__ . '/include/infosvx.php';
-require_once __DIR__ . '/include/hardware_info.php';
+//require_once __DIR__ . '/include/hardware_info.php';
 
-$hw             = getAllHardwareInfo();
+//$hw             = getAllHardwareInfo();
 $repeaterData   = getRepeaterStatus();
 $repeaterStatus = $repeaterData['status'];
 $rsDesc         = $repeaterData['description'];

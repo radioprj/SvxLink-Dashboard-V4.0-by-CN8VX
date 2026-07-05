@@ -4,11 +4,11 @@
  * Connected Nodes display page
  */
 require_once __DIR__ . '/include/infosvx.php';
-require_once __DIR__ . '/include/hardware_info.php';
+//require_once __DIR__ . '/include/hardware_info.php';
 
-$hw             = getAllHardwareInfo();
-$repeaterData   = getRepeaterStatus();
-$repeaterStatus = $repeaterData['status'];
+//$hw             = getAllHardwareInfo();
+//$repeaterData   = getRepeaterStatus();
+//$repeaterStatus = $repeaterData['status'];
 $rsDesc         = $repeaterData['description'];
 $hasLogo        = (LOGO_PATH !== '' && file_exists(__DIR__ . '/' . LOGO_PATH));
 
@@ -28,6 +28,7 @@ $totalNodes     = count($connectedNodes);
 </head>
 <body>
 <?php $activeNav = 'nodes'; include __DIR__ . '/include/navbar.php'; ?>
+<?php include __DIR__ . '/include/header.php'; ?>
 
 <div class="module-panel" style="margin: 10px;">
     <div class="panel-label panel-bar"><span class="block-icon">🌐</span>Connected Nodes to SVXReflector(<?php echo $totalNodes; ?>)</div>

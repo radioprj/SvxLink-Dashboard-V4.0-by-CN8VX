@@ -22,11 +22,10 @@ $activeNav = $activeNav ?? 'dashboard';
                     📡 Dashboard
                 </a>
             </li>
-
             <li>
-                <a href="logsvx.php" target="_blank" rel="noopener noreferrer"
-                   class="nav-link<?php echo $activeNav === 'activity' ? ' active' : ''; ?>">
-                    📋 Logs
+                <a href="nodes.php" target="_blank" 
+                   class="nav-link<?php echo $activeNav === 'nodes' ? ' active' : ''; ?>">
+                    🌐 Nodes
                 </a>
             </li>
 
@@ -36,11 +35,10 @@ $activeNav = $activeNav ?? 'dashboard';
                     🔊 Talk Groups
                 </a>
             </li>
-
             <li>
-                <a href="nodes.php" target="_blank" 
-                   class="nav-link<?php echo $activeNav === 'nodes' ? ' active' : ''; ?>">
-                    🌐 Nodes
+                <a href="logsvx.php" target="_blank" rel="noopener noreferrer"
+                   class="nav-link<?php echo $activeNav === 'activity' ? ' active' : ''; ?>">
+                    📋 Logs
                 </a>
             </li>
 <!--            <?php if (!empty($elModActive)): ?>
