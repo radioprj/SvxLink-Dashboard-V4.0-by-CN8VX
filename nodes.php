@@ -32,7 +32,7 @@ $totalNodes     = count($connectedNodes);
 
 <div class="module-panel" style="margin: 10px;">
     <div class="panel-label panel-bar"><span class="block-icon">🌐</span>Connected Nodes to SVXReflector (<?php echo $totalNodes; ?>)</div>
-    <div class="module-list" id="nodes-live" style="padding: 20px 20px;justify-content: center;">
+    <div class="module-list" id="nodes-live" style="padding: 20px 10px;justify-content: center;">
         <?php if (!empty($connectedNodes)): ?>
             <?php foreach ($connectedNodes as $node): ?>
                 <span class="node-badge<?php echo in_array($node, $activeTalkers, true) ? ' transmitting' : ''; ?>">
