@@ -37,6 +37,12 @@ $activeNav = $activeNav ?? 'dashboard';
                 </a>
             </li>
 
+            <li>
+                <a href="nodes.php" target="_blank" 
+                   class="nav-link<?php echo $activeNav === 'nodes' ? ' active' : ''; ?>">
+                    🌐 Nodes
+                </a>
+            </li>
             <?php if (!empty($elModActive)): ?>
             <li>
                 <a href="echolinksvx/index.php" target="_blank" rel="noopener noreferrer"

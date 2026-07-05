@@ -598,7 +598,7 @@ function updateReflectorActivity(entries) {
         var durAct = entry.active ? '1' : '0';
         var dur    = formatDuration(entry.duration);
         var dur = entry.duration_unknown
-            ? '<span class="dur-unknown" title="Talker stop nie znaleziony w logu — prawdopodobnie zerwane połączenie">❓</span>'
+            ? '<span class="dur-unknown" title="Unknown Talker stop">❓</span>'
             : formatDuration(entry.duration);
 
         newKeys[cs] = true;
@@ -662,6 +662,27 @@ function tickActiveDurations() {
         if (startTs <= 0) return;
         cell.innerHTML = formatDuration(Math.max(0, now - startTs));
     });
+}
+function fetchNodes() {
+    fetchJSON('include/functions.php?nodes_json=1', function(data) {
+        var el = document.getElementById('nodes-live');
+        if (!el || !data) return;
+
+        if (!data.length) {
+            el.innerHTML = '<span class="module-empty">No nodes connected</span>';
+            return;
+        }
+
+        el.innerHTML = data.map(function(n) {
+            var cls = 'node-badge' + (n.transmitting ? ' transmitting' : '');
+            return '<span class="' + cls + '">' + escHtml(n.callsign) + '</span>';
+        }).join('');
+    });
+}
+
+if (document.getElementById('nodes-live')) {
+    fetchNodes();
+    setInterval(fetchNodes, CFG.refresh * 1000);
 }
 
 // ════════════════════════════════════════════════════════

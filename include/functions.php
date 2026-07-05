@@ -993,6 +993,70 @@ function parseReflectorLogLine(string $line): ?array {
     ];
 }
 
+// ============================================================
+// LIST CONNECTED NODEs 
+// ============================================================
+
+function getSVXReflectorNodes(): array {
+    return dashboard_cached('svx_reflector_nodes', 5, function () {
+        $logPath = resolveLogPath();
+        if (!is_readable($logPath)) return [];
+
+        $lines = @file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false || empty($lines)) return [];
+
+        // Ograniczamy okno, żeby nie przetwarzać całego (rosnącego) logu
+        // przy każdym odświeżeniu cache (TTL 5s).
+        $lines = array_slice($lines, -5000);
+
+        $nodes = [];
+        $baselineIndex = null;
+
+        // Najnowsza migawka "Connected nodes: ..." w oknie — punkt
+        // startowy, od którego doliczamy joined/left.
+        for ($i = count($lines) - 1; $i >= 0; $i--) {
+            if (strpos($lines[$i], 'Connected nodes:') !== false) {
+                $baselineIndex = $i;
+                break;
+            }
+        }
+
+        if ($baselineIndex !== null) {
+            $pos = strpos($lines[$baselineIndex], 'Connected nodes:') + strlen('Connected nodes:');
+            $listPart = substr($lines[$baselineIndex], $pos);
+            foreach (explode(',', $listPart) as $n) {
+                $n = trim($n);
+                if ($n !== '') $nodes[$n] = true;
+            }
+        }
+
+        $startFrom = $baselineIndex !== null ? $baselineIndex + 1 : 0;
+
+        for ($i = $startFrom; $i < count($lines); $i++) {
+            $line = $lines[$i];
+
+            if (preg_match('/Node joined:\s*([A-Za-z0-9_\-]+)/', $line, $m)) {
+                $nodes[$m[1]] = true;
+            } elseif (preg_match('/Node left:\s*([A-Za-z0-9_\-]+)/', $line, $m)) {
+                unset($nodes[$m[1]]);
+            }
+        }
+
+        $result = array_keys($nodes);
+        sort($result);
+        return $result;
+    });
+}
+
+function getActiveTalkerCallsigns(): array {
+    $active = [];
+    foreach (getReflectorActivity(50) as $entry) {
+        if (!empty($entry['active'])) {
+            $active[] = $entry['callsign'];
+        }
+    }
+    return $active;
+}
 
 // ============================================================
 // REFLECTOR — ACTIVITÉ (remplace "Derniers appelants")
@@ -1182,5 +1246,39 @@ if (isset($_GET['repeater_status_json'])) {
     header('X-Content-Type-Options: nosniff');
 
     echo json_encode(getRepeaterStatus(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+// ============================================================
+// ENDPOINT JSON — Connected Nodes
+// URL : include/functions.php?nodes_json=1
+// ============================================================
+
+if (isset($_GET['nodes_json'])) {
+    if (ob_get_level()) ob_end_clean();
+    error_reporting(0);
+    ini_set('display_errors', 0);
+
+    if (!defined('SVXLINK_LOG')) require_once __DIR__ . '/config.php';
+
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, no-cache');
+    header('X-Content-Type-Options: nosniff');
+
+    $response = dashboard_cached('endpoint_json_nodes', 5, function () {
+        $nodes  = getSVXReflectorNodes();
+        $active = getActiveTalkerCallsigns();
+
+        $result = [];
+        foreach ($nodes as $node) {
+            $result[] = [
+                'callsign'     => $node,
+                'transmitting' => in_array($node, $active, true),
+            ];
+        }
+        return $result;
+    });
+
+    echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
