@@ -14,8 +14,6 @@ $repeaterStatus = $repeaterData['status'];
 $rsDesc         = $repeaterData['description'];
 $activeMods     = getActiveModules();
 
-// Nazwy w MODULES= w svxlink.conf mają prefiks "Module" (np. ModuleParrot),
-// ale w logu i na przyciskach chcemy samo "Parrot".
 $moduleLabels = !empty($MODULES)
     ? array_map(function ($m) {
         return trim(preg_replace('/^Module/i', '', trim($m)));

@@ -680,10 +680,6 @@ function fetchNodes() {
     });
 }
 
-if (document.getElementById('nodes-live')) {
-    fetchNodes();
-    setInterval(fetchNodes, CFG.refresh * 1000);
-}
 
 // ════════════════════════════════════════════════════════
 //  UPTIME SVXLINK — refresh every 30 s
@@ -808,6 +804,11 @@ function updateRepeaterUI(data) {
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    if (document.getElementById('nodes-live')) {
+        fetchNodes();
+        setInterval(fetchNodes, CFG.refresh * 1000);
+    }
+
     initTheme();
 
     startClock();
@@ -827,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setInterval(fetchHardwareLive, CFG.refresh * 1000);
 
-    setInterval(fetchEcholink, 30 * 1000);
+    setInterval(fetchEcholink, 10 * 1000);
 
     setInterval(fetchUptime, 30 * 1000);
 
