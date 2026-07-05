@@ -357,22 +357,30 @@ function getSvxlinkStartTimestamp(): int {
 
 function getActiveModules(): array {
     return dashboard_cached('svx_active_modules', 4, function () {
-        $path = SVXLINK_LOG;
-        if (!file_exists($path)) return [];
-
         // Bierzemy pod uwagę tylko wpisy PO ostatnim starcie svxlink —
         // dzięki temu stary "Activating module X" sprzed restartu
         // (bez towarzyszącego Deactivating) nie pokaże modułu jako
         // aktywnego, mimo że proces już dawno nie działa.
         $startTs = getSvxlinkStartTimestamp();
 
-        $output = shell_exec("LC_ALL=C LANG=C tail -3000 " . escapeshellarg($path) .
-                              " | egrep -a -h 'Activating module|Deactivating module'");
-        if (empty($output)) return [];
+        // Kolejność ma znaczenie: stary plik (.1) chronologicznie
+        // poprzedza bieżący — inaczej "Activating module" tuż przed
+        // rotacją mógłby zostać pominięty.
+        $paths = [SVXLINK_LOG . '.1', SVXLINK_LOG];
+        $lines = [];
+        foreach ($paths as $path) {
+            if (!file_exists($path)) continue;
+            $output = shell_exec("LC_ALL=C LANG=C tail -3000 " . escapeshellarg($path) .
+                                  " | egrep -a -h 'Activating module|Deactivating module'");
+            if (!empty($output)) {
+                $lines = array_merge($lines, explode("\n", $output));
+            }
+        }
+        if (empty($lines)) return [];
 
         $state = []; // nazwa_modulu => true/false (aktywny/nieaktywny)
 
-        foreach (explode("\n", $output) as $line) {
+        foreach ($lines as $line) {
             if (trim($line) === '') continue;
 
             $parsed = extractLogTimestamp($line);
@@ -1000,15 +1008,25 @@ function parseReflectorLogLine(string $line): ?array {
 function getSVXReflectorNodes(): array {
     return dashboard_cached('svx_reflector_nodes', 5, function () {
         $logPath = resolveLogPath();
-        if (!is_readable($logPath)) return [];
 
-        $lines = @file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false || empty($lines)) return [];
+        // Kolejność ma znaczenie: stary plik (.1) chronologicznie
+        // poprzedza bieżący — inaczej migawka "Connected nodes:" i
+        // zdarzenia "joined/left" tuż po rotacji/restarcie mogłyby
+        // wylądować w złej kolejności.
+        $paths = [$logPath . '.1', $logPath];
+        $lines = [];
+        foreach ($paths as $path) {
+            if (!is_readable($path)) continue;
+            $fileLines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($fileLines !== false) {
+                $lines = array_merge($lines, $fileLines);
+            }
+        }
+        if (empty($lines)) return [];
 
-        // Ograniczamy okno, żeby nie przetwarzać całego (rosnącego) logu
-        // przy każdym odświeżeniu cache (TTL 5s).
-        $lines = array_slice($lines, -5000);
-
+        // Ograniczamy okno (teraz potencjalnie 2 pliki), żeby nie
+        // przetwarzać całej historii przy każdym odświeżeniu cache.
+        $lines = array_slice($lines, -20000);
         $nodes = [];
         $baselineIndex = null;
 
