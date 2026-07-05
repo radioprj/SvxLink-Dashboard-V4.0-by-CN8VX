@@ -995,9 +995,10 @@ canvas#specCanvas { width: 100%; height: 50px; display: block; }
 .rs-desc {
     font-size: 11px;
     color: var(--rf-muted);
-    margin-top: 6px;
     font-family: 'Share Tech Mono', monospace;
     letter-spacing: 0.5px;
+    margin-top: 8px;
+    margin-bottom: 8px;
     margin-left: 10px;
 }
 
