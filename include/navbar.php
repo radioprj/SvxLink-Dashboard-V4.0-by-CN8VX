@@ -43,7 +43,7 @@ $activeNav = $activeNav ?? 'dashboard';
                     🌐 Nodes
                 </a>
             </li>
-            <?php if (!empty($elModActive)): ?>
+<!--            <?php if (!empty($elModActive)): ?>
             <li>
                 <a href="echolinksvx/index.php" target="_blank" rel="noopener noreferrer"
                    class="nav-link<?php echo $activeNav === 'echolink' ? ' active' : ''; ?>">
@@ -51,7 +51,7 @@ $activeNav = $activeNav ?? 'dashboard';
                 </a>
             </li>
             <?php endif; ?>
-
+-->
             <!-- =================================================================
                     Liens externes — modifier selon votre installation
                     External links — customize according to your installation
