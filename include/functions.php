@@ -31,6 +31,39 @@ function format_uptime(int $seconds): string {
 }
 
 // ============================================================
+// TAIL W CZYSTYM PHP (zamiennik `tail -N` bez shell_exec)
+// Czyta plik od końca w kawałkach — nie wczytuje całego pliku.
+// ============================================================
+function tail_lines(string $path, int $maxLines): array {
+    if ($maxLines <= 0 || !is_readable($path)) return [];
+
+    $fh = @fopen($path, 'rb');
+    if ($fh === false) return [];
+
+    $chunkSize = 8192;
+    $pos       = filesize($path);
+    $buffer    = '';
+    $lineCount = 0;
+
+    while ($pos > 0 && $lineCount <= $maxLines) {
+        $read = min($chunkSize, $pos);
+        $pos -= $read;
+        fseek($fh, $pos);
+        $buffer    = fread($fh, $read) . $buffer;
+        $lineCount = substr_count($buffer, "\n");
+    }
+    fclose($fh);
+
+    $lines = explode("\n", $buffer);
+    if ($lines !== [] && end($lines) === '') array_pop($lines);
+
+    return array_slice($lines, -$maxLines);
+}
+
+function tail_grep(string $path, int $maxLines, string $pattern): array {
+    return array_values(preg_grep($pattern, tail_lines($path, $maxLines)));
+}
+// ============================================================
 // SVXLINK LOGS
 // ============================================================
 function getSVXLog(): array {
@@ -39,15 +72,11 @@ function getSVXLog(): array {
         $paths = [SVXLINK_LOG, SVXLINK_LOG . ".1"];
         foreach ($paths as $path) {
             if (file_exists($path)) {
-                $cmd = "LC_ALL=C LANG=C tail -10000 " . escapeshellarg($path) .
-                       " | egrep -a -h 'Talker start on|Talker stop on'";
-                $output = shell_exec($cmd);
-                if (!empty($output)) {
-                    $logLines = array_merge($logLines, explode("\n", $output));
-                }
+                $filtered = tail_grep($path, 10000, '/Talker start on|Talker stop on/');
+                $logLines = array_merge($logLines, $filtered);
             }
         }
-        return array_slice($logLines, -500);
+        return array_slice($logLines, -1000);
     });
 }
 
@@ -57,12 +86,8 @@ function getSVXStatusLog(): array {
         $paths = [SVXLINK_LOG, SVXLINK_LOG . ".1"];
         foreach ($paths as $path) {
             if (file_exists($path)) {
-                $cmd = "LC_ALL=C LANG=C tail -10000 " . escapeshellarg($path) .
-                       " | egrep -a -h 'EchoLink QSO|ransmitter|Selecting'";
-                $output = shell_exec($cmd);
-                if (!empty($output)) {
-                    $logLines = array_merge($logLines, explode("\n", $output));
-                }
+                $filtered = tail_grep($path, 10000, '/EchoLink QSO|ransmitter|Selecting/');
+                $logLines = array_merge($logLines, $filtered);
             }
         }
         return array_slice($logLines, -250);
@@ -117,13 +142,10 @@ function getRepeaterStatus(): array {
         if (!is_readable($logPath)) {
             return ['status' => 'listening', 'description' => 'Listening - Log file not found'];
         }
-        $cmd    = "LC_ALL=C LANG=C tail -200 " . escapeshellarg($logPath);
-        $output = trim(shell_exec($cmd) ?? '');
-        if ($output === '') {
+        $lines = tail_lines($logPath, 200);
+        if (empty($lines)) {
             return ['status' => 'listening', 'description' => 'Listening - No log data'];
         }
-    $lines = explode("\n", $output);
-
     $status           = 'listening';
     $description      = 'Listening - No recent activity';
     $squelchOpen      = false;   
@@ -207,10 +229,13 @@ function getRepeaterStatus(): array {
 function getEchoLog(): array {
     return dashboard_cached('echo_log', 5, function () {
         $path = SVXLINK_LOG;
-        if (!file_exists($path)) return [];
+        if (!is_readable($path)) return [];
 
-        $output = shell_exec("grep -a -h 'EchoLink QSO' " . escapeshellarg($path));
-        return !empty($output) ? array_slice(explode("\n", $output), -500) : [];
+        $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) return [];
+
+        $filtered = preg_grep('/EchoLink QSO/', $lines);
+        return array_slice(array_values($filtered), -500);
     });
 }
 
@@ -246,11 +271,10 @@ function getEchoLinkTX(): string {
     return dashboard_cached('echolink_tx', 5, function () {
         $path = SVXLINK_LOG;
         if (!file_exists($path)) return '';
+        $matches = tail_grep($path, 10000, '/### EchoLink/');
+        $line    = end($matches) ?: '';
 
-        $line = shell_exec("tail -10000 " . escapeshellarg($path) .
-                           " | egrep -a -h '### EchoLink' | tail -1");
-
-        if ($line && strpos($line, "talker start") !== false) {
+        if ($line !== '' && strpos($line, "talker start") !== false) {
             return trim(substr($line, strpos($line, "start") + 6, 12));
         }
         return '';
@@ -263,26 +287,28 @@ function getSVXTGSelect(): string {
     return dashboard_cached('svx_tg_select', 5, function () {
         $path = SVXLINK_LOG;
         if (!file_exists($path)) return '';
-        $line = shell_exec("tail -10000 " . escapeshellarg($path) .
-                           " | egrep -a -h 'Selecting' | tail -1");
-        if ($line && strpos($line, "TG #") !== false) {
+        $matches = tail_grep($path, 10000, '/Selecting/');
+        $line    = end($matches) ?: '';
+        if ($line !== '' && strpos($line, "TG #") !== false) {
             return trim(substr($line, strpos($line, "#") + 1, 12));
         }
         return '';
     });
 }
 function getSVXTGTMP(): string {
-    $path = SVXLINK_LOG;
-    if (!file_exists($path)) return '';
+    return dashboard_cached('svx_tg_tmp', 5, function () {
+        $path = SVXLINK_LOG;
+        if (!is_readable($path)) return '';
 
-    $line = shell_exec("tail -10000 " . escapeshellarg($path) .
-                       " | egrep -a -h 'emporary monitor' | tail -1");
+        $matches = tail_grep($path, 10000, '/emporary monitor/');
+        $line    = end($matches) ?: '';
 
-    if ($line && strpos($line, "Add") !== false) {
-        return trim(substr($line, strpos($line, "#") + 1, 12));
-    }
+        if ($line !== '' && strpos($line, "Add") !== false) {
+            return trim(substr($line, strpos($line, "#") + 1, 12));
+        }
 
-    return '';
+        return '';
+    });
 }
 
 // ============================================================
@@ -290,9 +316,27 @@ function getSVXTGTMP(): string {
 // ============================================================
 function isProcessRunning(string $name): bool {
     return dashboard_cached('proc_running_' . $name, 5, function () use ($name) {
-        $output = shell_exec("pgrep -x " . escapeshellarg($name));
-        return !empty(trim($output ?? ''));
+        return getPidByName($name) !== 0;
     });
+}
+
+// Szuka PID procesu po dokładnej nazwie (jak `pgrep -x`), czytając
+// bezpośrednio /proc — bez shell_exec.
+function getPidByName(string $name): int {
+    $procs = @scandir('/proc');
+    if ($procs === false) return 0;
+
+    foreach ($procs as $pid) {
+        if (!ctype_digit($pid)) continue;
+
+        $commPath = "/proc/$pid/comm";
+        if (!is_readable($commPath)) continue;
+
+        if (trim((string)@file_get_contents($commPath)) === $name) {
+            return (int)$pid;
+        }
+    }
+    return 0;
 }
 
 function parse_svxlink_config(string $filePath): array {
@@ -324,18 +368,14 @@ function parse_svxlink_config(string $filePath): array {
 // ============================================================
 function getSvxlinkStatus(): string {
     return dashboard_cached('svx_status', 10, function () {
-        $out = shell_exec('systemctl is-active svxlink 2>/dev/null');
-        return trim($out !== null ? $out : 'unknown');
+        return getPidByName('svxlink') !== 0 ? 'active' : 'inactive';
     });
 }
+
 function getSvxlinkUptime(): string {
     return dashboard_cached('svx_uptime', 10, function () {
-        $out = shell_exec('systemctl show svxlink --property=ActiveEnterTimestamp 2>/dev/null');
-        if (!$out) return '';
-        if (!preg_match('/ActiveEnterTimestamp=(.+)/', trim($out), $m)) return '';
-        if (trim($m[1]) === '') return '';
-        $start = strtotime($m[1]);
-        if (!$start || $start <= 0) return '';
+        $start = getSvxlinkStartTimestamp();
+        if ($start <= 0) return '';
         return format_uptime((int)(time() - $start));
     });
 }
@@ -345,13 +385,28 @@ function getSvxlinkUptime(): string {
 
 function getSvxlinkStartTimestamp(): int {
     return dashboard_cached('svx_start_ts', 10, function () {
-        $out = shell_exec('systemctl show svxlink --property=ActiveEnterTimestamp 2>/dev/null');
-        if (!$out) return 0;
-        if (!preg_match('/ActiveEnterTimestamp=(.+)/', trim($out), $m)) return 0;
-        $val = trim($m[1]);
-        if ($val === '') return 0;
-        $ts = strtotime($val);
-        return $ts !== false ? $ts : 0;
+        $pid = getPidByName('svxlink');
+        if ($pid === 0) return 0;
+
+        $stat = @file_get_contents("/proc/$pid/stat");
+        if ($stat === false) return 0;
+
+        // Nazwa procesu w nawiasach może zawierać spacje — parsujemy
+        // od ostatniego ")". Pole nr 22 (starttime, w tickach od bootu)
+        // to indeks 19 licząc od pierwszego pola po nazwie.
+        $afterComm = strrchr($stat, ')');
+        if ($afterComm === false) return 0;
+        $fields = preg_split('/\s+/', trim($afterComm));
+        $starttimeTicks = isset($fields[19]) ? (int)$fields[19] : 0;
+        if ($starttimeTicks <= 0) return 0;
+
+        $uptimeRaw = @file_get_contents('/proc/uptime');
+        if ($uptimeRaw === false) return 0;
+        $systemUptime = (float)explode(' ', trim($uptimeRaw))[0];
+        $bootTime     = time() - (int)$systemUptime;
+
+        $hertz = 100; // standardowy CLK_TCK na Linuksie/RaspiOS
+        return $bootTime + (int)($starttimeTicks / $hertz);
     });
 }
 
@@ -370,11 +425,8 @@ function getActiveModules(): array {
         $lines = [];
         foreach ($paths as $path) {
             if (!file_exists($path)) continue;
-            $output = shell_exec("LC_ALL=C LANG=C tail -3000 " . escapeshellarg($path) .
-                                  " | egrep -a -h 'Activating module|Deactivating module'");
-            if (!empty($output)) {
-                $lines = array_merge($lines, explode("\n", $output));
-            }
+        $filtered = tail_grep($path, 3000, '/Activating module|Deactivating module/');
+            $lines = array_merge($lines, $filtered);
         }
         if (empty($lines)) return [];
 
@@ -1009,24 +1061,31 @@ function getSVXReflectorNodes(): array {
     return dashboard_cached('svx_reflector_nodes', 5, function () {
         $logPath = resolveLogPath();
 
-        // Kolejność ma znaczenie: stary plik (.1) chronologicznie
-        // poprzedza bieżący — inaczej migawka "Connected nodes:" i
-        // zdarzenia "joined/left" tuż po rotacji/restarcie mogłyby
-        // wylądować w złej kolejności.
         $paths = [$logPath . '.1', $logPath];
         $lines = [];
-        foreach ($paths as $path) {
-            if (!is_readable($path)) continue;
-            $fileLines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            if ($fileLines !== false) {
-                $lines = array_merge($lines, $fileLines);
-            }
-        }
-        if (empty($lines)) return [];
+	foreach ($paths as $path) {
+	    if (!is_readable($path)) {	
+	        continue;
+	    }
 
-        // Ograniczamy okno (teraz potencjalnie 2 pliki), żeby nie
-        // przetwarzać całej historii przy każdym odświeżeniu cache.
-        $lines = array_slice($lines, -20000);
+	    $fh = fopen($path, 'r');
+	    if (!$fh) {
+	        continue;
+	    }
+
+	    while (($line = fgets($fh)) !== false) {
+	        if (
+	            strpos($line, 'Connected nodes:') !== false ||
+	            strpos($line, 'Node joined:') !== false ||
+	            strpos($line, 'Node left:') !== false
+	        ) {
+	            $lines[] = rtrim($line);
+	        }
+	    }
+
+	    fclose($fh);
+	}
+	$lines = array_slice($lines, -20000);
         $nodes = [];
         $baselineIndex = null;
 
@@ -1091,12 +1150,8 @@ function getReflectorActivity(int $max = 50): array {
         $logPath = resolveLogPath();
         if (!is_readable($logPath)) return [];
 
-        $cmd = "LC_ALL=C LANG=C tail -5000 " . escapeshellarg($logPath);
-        $content = shell_exec($cmd);
-
-        if (!$content) return [];
-        $lines = explode("\n", $content);
-
+        $lines = tail_lines($logPath, 5000);
+        if (empty($lines)) return [];
         $pending  = [];
         $sessions = [];
 

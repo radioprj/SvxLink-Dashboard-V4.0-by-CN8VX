@@ -50,7 +50,7 @@ function hw_cpuTemp(): string {
         $r = @file_get_contents($p);
         if ($r !== false) {
             $v = (int)trim($r);
-            if ($v > 0) return number_format($v / 1000.0,1)+CPU_TEMP_OFFSET;
+            if ($v > 0) return number_format(($v / 1000.0) + CPU_TEMP_OFFSET, 1);
         }
     }
     $o = hw_cmd('vcgencmd measure_temp');
@@ -62,8 +62,7 @@ function hw_cpuTemp(): string {
 
 /* ── CPU arch / model ────────────────────────────────────────── */
 function hw_cpuArch(): string {
-    $o = hw_cmd('uname -m');
-    return ($o !== '') ? $o : php_uname('m');
+    return php_uname('m'); // identyczne z `uname -m`, bez shell_exec
 }
 
 function hw_cpuModel(): string {
@@ -81,9 +80,6 @@ function hw_cpuModel(): string {
 
 /* ── CPU cores ───────────────────────────────────────────────── */
 function hw_cpuCores(): int {
-    $cores = (int)shell_exec('nproc 2>/dev/null');
-    if ($cores > 0) return $cores;
-
     if (is_readable('/proc/cpuinfo')) {
         $c = @file_get_contents('/proc/cpuinfo');
         if ($c !== false) {
@@ -92,12 +88,16 @@ function hw_cpuCores(): int {
         }
     }
 
+    // /proc/cpuinfo wystarcza na każdym Linuksie — to zostaje
+    // wyłącznie jako awaryjny fallback.
+    $cores = (int)shell_exec('nproc 2>/dev/null');
+    if ($cores > 0) return $cores;
+
     $cores = (int)shell_exec('getconf _NPROCESSORS_ONLN 2>/dev/null');
     if ($cores > 0) return $cores;
 
     return 1;
 }
-
 /* ── RAM ─────────────────────────────────────────────────────── */
 function hw_memInfo(): array {
     if (!is_readable('/proc/meminfo')) return [];
@@ -155,27 +155,38 @@ function hw_hostname(): string {
 
 /* ── IP locale ───────────────────────────────────────────────── */
 function hw_localIP(): string {
-    $o = hw_cmd('hostname -I');
-    if ($o !== '') {
-        foreach (explode(' ', $o) as $ip) {
-            $ip = trim($ip);
-            if ($ip !== '' && strpos($ip, ':') === false
-                && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
-                return $ip;
+    // Czysty PHP: "łączymy" gniazdo UDP w stronę publicznego adresu
+    // (bez wysyłania jakichkolwiek danych) i odczytujemy lokalny adres
+    // źródłowy — to samo co robi `ip route get`, bez shell_exec.
+    if (function_exists('socket_create')) {
+        $sock = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if ($sock !== false) {
+            if (@socket_connect($sock, '1.1.1.1', 53) && @socket_getsockname($sock, $ip)) {
+                socket_close($sock);
+                if (!empty($ip) && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+                    return $ip;
+                }
+            } else {
+                socket_close($sock);
             }
         }
     }
-    $o2 = hw_cmd("ip route get 1.1.1.1 | grep -oP 'src \K\S+'");
-    if ($o2 !== '' && filter_var($o2, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) return $o2;
-    $o3 = hw_cmd("ip -4 addr show scope global | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}' | head -1");
-    if ($o3 !== '' && filter_var($o3, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) return $o3;
+
+    // Fallback na wypadek braku rozszerzenia php-sockets.
+    $o = hw_cmd('hostname -I');
+    foreach (explode(' ', $o) as $ip) {
+        $ip = trim($ip);
+        if ($ip !== '' && strpos($ip, ':') === false
+            && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+            return $ip;
+        }
+    }
     return 'N/A';
 }
 
 /* ── Kernel / OS / Versions ──────────────────────────────────── */
 function hw_kernel(): string {
-    $o = hw_cmd('uname -r');
-    return ($o !== '') ? $o : php_uname('r');
+    return php_uname('r'); // identyczne z `uname -r`, bez shell_exec
 }
 
 function hw_linuxVersion(): string {
