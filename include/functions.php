@@ -139,10 +139,18 @@ function getSVXRstatus(): string {
 function getRepeaterStatus(): array {
     return dashboard_cached('repeater_status', 2, function () {
         $logPath = resolveLogPath();
-        if (!is_readable($logPath)) {
+        if (!is_readable($logPath) && !is_readable($logPath . '.1')) {
             return ['status' => 'listening', 'description' => 'Listening - Log file not found'];
         }
-        $lines = tail_lines($logPath, 200);
+
+        $lines = [];
+        foreach ([$logPath . '.1', $logPath] as $path) {
+            if (is_readable($path)) {
+                $lines = array_merge($lines, tail_lines($path, 200));
+            }
+        }
+        $lines = array_slice($lines, -200);
+
         if (empty($lines)) {
             return ['status' => 'listening', 'description' => 'Listening - No log data'];
         }
@@ -228,17 +236,16 @@ function getRepeaterStatus(): array {
 
 function getEchoLog(): array {
     return dashboard_cached('echo_log', 5, function () {
-        $path = SVXLINK_LOG;
-        if (!is_readable($path)) return [];
-
-        $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false) return [];
-
-        $filtered = preg_grep('/EchoLink QSO/', $lines);
-        return array_slice(array_values($filtered), -500);
+        $logLines = [];
+        foreach ([SVXLINK_LOG . '.1', SVXLINK_LOG] as $path) {
+            if (!is_readable($path)) continue;
+            $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines === false) continue;
+            $logLines = array_merge($logLines, array_values(preg_grep('/EchoLink QSO/', $lines)));
+        }
+        return array_slice($logLines, -500);
     });
 }
-
 function getConnectedEcholink(array $echolog): array {
     $users = [];
 
@@ -269,10 +276,13 @@ function getConnectedEcholink(array $echolog): array {
 
 function getEchoLinkTX(): string {
     return dashboard_cached('echolink_tx', 5, function () {
-        $path = SVXLINK_LOG;
-        if (!file_exists($path)) return '';
-        $matches = tail_grep($path, 10000, '/### EchoLink/');
-        $line    = end($matches) ?: '';
+        $matches = [];
+        foreach ([SVXLINK_LOG . '.1', SVXLINK_LOG] as $path) {
+            if (file_exists($path)) {
+                $matches = array_merge($matches, tail_grep($path, 10000, '/### EchoLink/'));
+            }
+        }
+        $line = end($matches) ?: '';
 
         if ($line !== '' && strpos($line, "talker start") !== false) {
             return trim(substr($line, strpos($line, "start") + 6, 12));
@@ -285,10 +295,13 @@ function getEchoLinkTX(): string {
 // ============================================================
 function getSVXTGSelect(): string {
     return dashboard_cached('svx_tg_select', 5, function () {
-        $path = SVXLINK_LOG;
-        if (!file_exists($path)) return '';
-        $matches = tail_grep($path, 10000, '/Selecting/');
-        $line    = end($matches) ?: '';
+        $matches = [];
+        foreach ([SVXLINK_LOG . '.1', SVXLINK_LOG] as $path) {
+            if (file_exists($path)) {
+                $matches = array_merge($matches, tail_grep($path, 10000, '/Selecting/'));
+            }
+        }
+        $line = end($matches) ?: '';
         if ($line !== '' && strpos($line, "TG #") !== false) {
             return trim(substr($line, strpos($line, "#") + 1, 12));
         }
@@ -297,11 +310,13 @@ function getSVXTGSelect(): string {
 }
 function getSVXTGTMP(): string {
     return dashboard_cached('svx_tg_tmp', 5, function () {
-        $path = SVXLINK_LOG;
-        if (!is_readable($path)) return '';
-
-        $matches = tail_grep($path, 10000, '/emporary monitor/');
-        $line    = end($matches) ?: '';
+        $matches = [];
+        foreach ([SVXLINK_LOG . '.1', SVXLINK_LOG] as $path) {
+            if (is_readable($path)) {
+                $matches = array_merge($matches, tail_grep($path, 10000, '/emporary monitor/'));
+            }
+        }
+        $line = end($matches) ?: '';
 
         if ($line !== '' && strpos($line, "Add") !== false) {
             return trim(substr($line, strpos($line, "#") + 1, 12));
