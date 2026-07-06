@@ -392,11 +392,13 @@ function getSvxlinkStartTimestamp(): int {
         if ($stat === false) return 0;
 
         // Nazwa procesu w nawiasach może zawierać spacje — parsujemy
-        // od ostatniego ")". Pole nr 22 (starttime, w tickach od bootu)
-        // to indeks 19 licząc od pierwszego pola po nazwie.
-        $afterComm = strrchr($stat, ')');
-        if ($afterComm === false) return 0;
-        $fields = preg_split('/\s+/', trim($afterComm));
+        // od ostatniego ")" i USUWAMY sam nawias (inaczej przesuwa
+        // numerację pól o 1). Pole nr 22 (starttime, w tickach od
+        // bootu) to indeks 19 licząc od pierwszego pola po nazwie.
+        $parenPos = strrpos($stat, ')');
+        if ($parenPos === false) return 0;
+        $afterComm = trim(substr($stat, $parenPos + 1));
+        $fields = preg_split('/\s+/', $afterComm);
         $starttimeTicks = isset($fields[19]) ? (int)$fields[19] : 0;
         if ($starttimeTicks <= 0) return 0;
 
