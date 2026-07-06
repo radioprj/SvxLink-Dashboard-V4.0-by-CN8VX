@@ -1150,9 +1150,14 @@ function isSVXReflectorActive(array $conf): bool {
 function getReflectorActivity(int $max = 50): array {
     return dashboard_cached('reflector_activity_' . $max, 4, function () use ($max) {
         $logPath = resolveLogPath();
-        if (!is_readable($logPath)) return [];
+        if (!is_readable($logPath) && !is_readable($logPath . '.1')) return [];
 
-        $lines = tail_lines($logPath, 5000);
+        $lines = [];
+        foreach ([$logPath . '.1', $logPath] as $path) {
+            if (is_readable($path)) {
+                $lines = array_merge($lines, tail_lines($path, 5000));
+            }
+        }
         if (empty($lines)) return [];
         $pending  = [];
         $sessions = [];
