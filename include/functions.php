@@ -1359,21 +1359,23 @@ if (isset($_GET['nodes_json'])) {
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store, no-cache');
     header('X-Content-Type-Options: nosniff');
-
-    $response = dashboard_cached('endpoint_json_nodes', 5, function () {
+        $response = dashboard_cached('endpoint_json_nodes', 5, function () {
         $nodes  = getSVXReflectorNodes();
         $active = getActiveTalkerCallsigns();
 
-        $result = [];
+        $list = [];
         foreach ($nodes as $node) {
-            $result[] = [
+            $list[] = [
                 'callsign'     => $node,
                 'transmitting' => in_array($node, $active, true),
             ];
         }
-        return $result;
-    });
 
+        return [
+            'nodes' => $list,
+            'count' => count($list),
+        ];
+    });
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
