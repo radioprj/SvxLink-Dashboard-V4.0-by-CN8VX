@@ -314,16 +314,32 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
               <?php endif; ?>
             </span>
           </div>
-
           <div class="node-row">
             <span class="node-name">Number of Connections</span>
             <span class="node-ping" id="el-count"><?php echo count($elUsers); ?></span>
           </div>
 
+          <div class="node-row">
+            <span class="node-name">Connected</span>
+            <span class="node-ping el-connect-mode" id="el-proxy">
+              <?php echo $elProxy !== '' ? 'via PROXY ' . htmlspecialchars($elProxy) : 'Direct'; ?>
+            </span>
+          </div>
+
+          <div class="node-row">
+            <span class="node-name">Link Status</span>
+            <?php
+                $elLinkClass = ($elStatusLink === 'Connected') ? 'status-connected'
+                             : (($elStatusLink === 'Banned') ? 'status-banned' : 'status-disconnected');
+            ?>
+            <span class="node-ping link-status-value <?php echo $elLinkClass; ?>" id="el-link-status">
+              <?php echo htmlspecialchars($elStatusLink); ?>
+            </span>
+          </div>
+
         </div>
       </div>
       <?php endif; ?>
-
 <!-- ══ Hardware Info ════════════════════════════ -->
       <div class="panel">
         <div class="panel-label panel-bar"><span class="block-icon">📟</span>Hardware Info</div>

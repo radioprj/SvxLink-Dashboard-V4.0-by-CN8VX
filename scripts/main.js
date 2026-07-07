@@ -365,11 +365,13 @@ function startSysUptimeTicker(initialStr) {
 //  ECHOLINK
 //
 //  Targets in index.php:
-//    id="el-callsign" → QRZ callsign link
-//    id="el-location" → location
-//    id="el-sysop"    → sysop name
-//    id="el-nodes"    → connected nodes (QRZ links)
-//    id="el-count"    → connection count
+//    id="el-callsign"    → QRZ callsign link
+//    id="el-location"    → location
+//    id="el-sysop"       → sysop name
+//    id="el-nodes"       → connected nodes (QRZ links)
+//    id="el-count"       → connection count
+//    id="el-proxy"       → Direct / via PROXY <name>
+//    id="el-link-status" → Connected / Disconnected / Banned
 // ════════════════════════════════════════════════════════
 
 function fetchEcholink() {
@@ -412,8 +414,20 @@ function updateEcholinkPanel(data) {
     setEl('el-sysop',    data.sysop    || '—');
     setElHTML('el-nodes', renderNodesList(data.connected_nodes || []));
     setEl('el-count', String(data.connected_count || 0));
-}
 
+    setEl('el-proxy', data.proxy ? ('via PROXY ' + data.proxy) : 'Direct');
+
+    var linkEl = document.getElementById('el-link-status');
+    if (linkEl) {
+        var status = data.link_status || 'Disconnected';
+        linkEl.textContent = status;
+        linkEl.classList.remove('status-connected', 'status-disconnected', 'status-banned');
+        linkEl.classList.add(
+            status === 'Connected' ? 'status-connected' :
+            status === 'Banned'    ? 'status-banned'     : 'status-disconnected'
+        );
+    }
+}
 // ════════════════════════════════════════════════════════
 //  SVXLINK STATUS (global polling)
 // ════════════════════════════════════════════════════════

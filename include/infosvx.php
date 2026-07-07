@@ -90,6 +90,7 @@ $elModActive = false;
 $elCallsign  = '';
 $elSysopName = '';
 $elLocation  = '';
+$elProxy     = '';
 
 if (!empty($MODULES)) {
     $mods = array_map('trim', explode(',', $MODULES));
@@ -102,34 +103,28 @@ $elConfError = '';
 if ($elModActive) {
     if (file_exists($echolinkConfPath)) {
         $elConfig     = parse_svxlink_config($echolinkConfPath);
-        $elCallsign   = $elConfig['ModuleEchoLink']['CALLSIGN']  ?? '';
-        $elSysopName  = $elConfig['ModuleEchoLink']['SYSOPNAME'] ?? '';
-        $elLocation   = $elConfig['ModuleEchoLink']['LOCATION']  ?? '';
+        $elCallsign   = $elConfig['ModuleEchoLink']['CALLSIGN']      ?? '';
+        $elSysopName  = $elConfig['ModuleEchoLink']['SYSOPNAME']     ?? '';
+        $elLocation   = $elConfig['ModuleEchoLink']['LOCATION']      ?? '';
+        $elProxy      = trim($elConfig['ModuleEchoLink']['PROXY_SERVER'] ?? '');
     } else { /** Si le Fichier de config introuvable */
         $elConfError = "Error: EchoLink configuration file not found.";
     }
 }
-
-if ($elModActive && file_exists($echolinkConfPath)) {
-    $elConfig     = parse_svxlink_config($echolinkConfPath);
-    $elCallsign   = $elConfig['ModuleEchoLink']['CALLSIGN']  ?? '';
-    $elSysopName  = $elConfig['ModuleEchoLink']['SYSOPNAME'] ?? '';
-    $elLocation   = $elConfig['ModuleEchoLink']['LOCATION']  ?? '';
-}
-
 // ========================================================
 // ECHOLINK RUNTIME
 // ========================================================
 
 $elUsers = [];
 $elTxing = '';
+$elStatusLink = 'Disconnected';
 
 if ($elModActive && isProcessRunning('svxlink')) {
-    $log      = getEchoLog();
-    $elUsers  = getConnectedEcholink($log);
-    $elTxing  = getEchoLinkTX();
+    $log          = getEchoLog();
+    $elUsers      = getConnectedEcholink($log);
+    $elTxing      = getEchoLinkTX();
+    $elStatusLink = getEchoLinkConnect();
 }
-
 // ========================================================
 // EXPORT (UTILISATION EXTERNE)
 // ========================================================

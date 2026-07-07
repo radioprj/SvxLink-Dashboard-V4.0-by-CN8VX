@@ -290,6 +290,56 @@ function getEchoLinkTX(): string {
         return '';
     });
 }
+
+// ============================================================
+// ECHOLINK — link status wobec serwera katalogowego/proxy
+// (Connected / Banned / Disconnected). Ten sam wzorzec co
+// getSVXRstatus(): skan wstecz, bieżący plik, potem rotacja .1.
+// ============================================================
+function getEchoLinkConnect(): string {
+    return dashboard_cached('echolink_link_status', 5, function () {
+        $connectPatterns    = ['EchoLink Server v'];
+        $bannedPatterns     = ['INCORRECT PASSWORD', 'Access denied to EchoLink proxy'];
+        $disconnectPatterns = [
+            'EchoLink directory status changed to OFF',
+            'Command timeout while communicating to the directory server',
+            'Disconnected from EchoLink proxy',
+        ];
+        $allPatterns = array_merge($connectPatterns, $bannedPatterns, $disconnectPatterns);
+
+        $paths = [SVXLINK_LOG, SVXLINK_LOG . '.1'];
+
+        foreach ($paths as $path) {
+            if (!file_exists($path) || !is_readable($path)) continue;
+
+            $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines === false) continue;
+
+            for ($i = count($lines) - 1; $i >= 0; $i--) {
+                $line = $lines[$i];
+
+                $matched = false;
+                foreach ($allPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) { $matched = true; break; }
+                }
+                if (!$matched) continue;
+
+                foreach ($bannedPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) return 'Banned';
+                }
+                foreach ($connectPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) return 'Connected';
+                }
+                foreach ($disconnectPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) return 'Disconnected';
+                }
+            }
+        }
+
+        return 'Disconnected';
+    });
+}
+
 // ============================================================
 // TG / REFLECTOR
 // ============================================================
@@ -522,19 +572,23 @@ if (isset($_GET['echolink_json'])) {
         $elCallsign  = '';
         $elSysopName = '';
         $elLocation  = '';
+        $elProxy     = '';
         $elUsers     = [];
+        $elLinkStatus = 'Disconnected';
 
         $echolinkConfPath = '/etc/svxlink/svxlink.d/ModuleEchoLink.conf';
         if (file_exists($echolinkConfPath)) {
             $elConfig    = parse_svxlink_config($echolinkConfPath);
-            $elCallsign  = $elConfig['ModuleEchoLink']['CALLSIGN']  ?? '';
-            $elSysopName = $elConfig['ModuleEchoLink']['SYSOPNAME'] ?? '';
-            $elLocation  = $elConfig['ModuleEchoLink']['LOCATION']  ?? '';
+            $elCallsign  = $elConfig['ModuleEchoLink']['CALLSIGN']      ?? '';
+            $elSysopName = $elConfig['ModuleEchoLink']['SYSOPNAME']     ?? '';
+            $elLocation  = $elConfig['ModuleEchoLink']['LOCATION']      ?? '';
+            $elProxy     = trim($elConfig['ModuleEchoLink']['PROXY_SERVER'] ?? '');
         }
 
         if (isProcessRunning('svxlink')) {
-            $log     = getEchoLog();
-            $elUsers = getConnectedEcholink($log);
+            $log          = getEchoLog();
+            $elUsers      = getConnectedEcholink($log);
+            $elLinkStatus = getEchoLinkConnect();
         }
 
         $elCallsignQrz = preg_replace('/-[LR]$/i', '', $elCallsign);
@@ -544,8 +598,10 @@ if (isset($_GET['echolink_json'])) {
             'callsign_qrz'    => $elCallsignQrz,
             'sysop'           => $elSysopName,
             'location'        => $elLocation,
+            'proxy'           => $elProxy,
             'connected_nodes' => $elUsers,
             'connected_count' => count($elUsers),
+            'link_status'     => $elLinkStatus,
         ];
     });
 
