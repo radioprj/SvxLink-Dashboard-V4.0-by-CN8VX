@@ -70,6 +70,11 @@ define('FREQ_OFFSET', '');
 // Thème par défaut au chargement : 'dark' ou 'light'
 define('DEFAULT_THEME', 'dark');
 
+// Default interface language on first visit: 'en' or 'pl'
+// (odwiedzający może zmienić flagą w navbarze — wybór zapamiętany
+// w przeglądarce nadpisuje tę wartość przy kolejnych wizytach)
+define('DEFAULT_LANG', 'pl');
+
 // Define CPU temperature offset for example for Orange Pi Zero v1 LTS
 define('CPU_TEMP_OFFSET', '0');
 

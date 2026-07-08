@@ -24,14 +24,16 @@ $totalNodes     = count($connectedNodes);
     <title>Connected Nodes - SvxLink <?php echo htmlspecialchars($repeaterType ?? ''); ?> Repeater Dashboard - <?php echo htmlspecialchars($CALLSIGN); ?></title>
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
+    <script src="scripts/i18n.js"></script>
     <script src="scripts/main.js"></script>
 </head>
 <body>
+<?php include __DIR__ . '/include/dash_config.php'; ?>
 <?php $activeNav = 'nodes'; include __DIR__ . '/include/navbar.php'; ?>
 <?php include __DIR__ . '/include/header.php'; ?>
 
 <div class="module-panel" style="margin: 10px;">
-     <div class="panel-label panel-bar"><span class="block-icon">🌐</span>Connected Nodes to SVXReflector (<span id="nodes-count"><?php echo $totalNodes; ?></span>)</div>
+<div class="panel-label panel-bar"><span class="block-icon">🌐</span><span data-i18n="nodes.title">Connected Nodes to SVXReflector</span> (<span id="nodes-count"><?php echo $totalNodes; ?></span>)</div>
     <div class="module-list" id="nodes-live" style="padding: 20px 10px;justify-content: center;">
         <?php if (!empty($connectedNodes)): ?>
             <?php foreach ($connectedNodes as $node): ?>
@@ -40,7 +42,7 @@ $totalNodes     = count($connectedNodes);
                 </span>
             <?php endforeach; ?>
         <?php else: ?>
-            <span class="module-empty">No nodes connected</span>
+            <span class="module-empty" data-i18n="nodes.empty">No nodes connected</span>
         <?php endif; ?>
     </div>
 </div>

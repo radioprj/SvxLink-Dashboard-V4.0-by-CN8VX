@@ -271,8 +271,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
         <?php if (!empty($elConfError)): ?>
           <div class="error-msg"><?php echo $elConfError; ?></div>
         <?php endif; ?>
-
-        <div class="panel-label panel-bar"><span class="block-icon">🔗</span>EchoLink NODE Information</div>
+        <div class="panel-label panel-bar"><span class="block-icon">🔗</span><span data-i18n="echolink.title">EchoLink NODE Information</span></div>
         <div class="node-list">
 
           <div class="node-row">
@@ -446,14 +445,8 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
 
 <?php include __DIR__ . '/include/footer.php'; ?>
 
-<script>
-window.DASH_CONFIG = {
-    refresh:       8,
-    qrz_enabled:   true,
-    qrz_url:       'https://www.qrz.com/db/',
-    default_theme: '<?php echo htmlspecialchars(DEFAULT_THEME); ?>'
-};
-</script>
+<?php include __DIR__ . '/include/dash_config.php'; ?>
+<script src="scripts/i18n.js"></script>
 <script src="scripts/main.js"></script>
 </body>
 </html>

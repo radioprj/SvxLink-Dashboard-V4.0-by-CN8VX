@@ -686,12 +686,10 @@ function fetchNodes() {
 
         var countEl = document.getElementById('nodes-count');
         if (countEl) countEl.textContent = data.count !== undefined ? data.count : list.length;
-
         if (!list.length) {
-            el.innerHTML = '<span class="module-empty">No nodes connected</span>';
+            el.innerHTML = '<span class="module-empty">' + t('nodes.empty', 'No nodes connected') + '</span>';
             return;
         }
-
         el.innerHTML = list.map(function(n) {
             var cls = 'node-badge' + (n.transmitting ? ' transmitting' : '');
             return '<span class="' + cls + '">' + escHtml(n.callsign) + '</span>';

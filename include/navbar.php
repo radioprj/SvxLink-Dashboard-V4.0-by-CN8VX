@@ -19,7 +19,7 @@ $activeNav = $activeNav ?? 'dashboard';
             <li>
                 <a href="index.php"
                    class="nav-link<?php echo $activeNav === 'dashboard' ? ' active' : ''; ?>">
-                    📡 Dashboard
+                   📡 <span data-i18n="nav.dashboard">Dashboard</span>
                 </a>
             </li>
             <li>
@@ -54,13 +54,17 @@ $activeNav = $activeNav ?? 'dashboard';
                     Liens externes — modifier selon votre installation
                     External links — customize according to your installation
             ====================================================================== --> 
-            
-            <li>
+	    <li>
                 <a href="http://dashboard.fm-poland.pl/" target="_blank" rel="noopener"
                    class="nav-link nav-link-ext">SVXReflector</a>
             </li>
 
 
         </ul>
+
+        <div class="lang-switch">
+            <button type="button" class="lang-flag" data-lang="en" onclick="setLang('en')" title="English">🇬🇧</button>
+            <button type="button" class="lang-flag" data-lang="pl" onclick="setLang('pl')" title="Polski">🇵🇱</button>
+        </div>
     </div>
 </nav>

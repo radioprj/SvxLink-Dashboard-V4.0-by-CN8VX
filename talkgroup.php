@@ -39,43 +39,51 @@ $totalTG = count($talkgroups);
     <title>Talk Groups - SvxLink <?php echo htmlspecialchars($repeaterType ?? ''); ?> Repeater Dashboard - <?php echo htmlspecialchars($CALLSIGN); ?></title>
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
+    <script src="scripts/i18n.js"></script>
     <script src="scripts/main.js"></script>
 </head>
 <body>
+<?php include __DIR__ . '/include/dash_config.php'; ?>
 <?php $activeNav = 'talkgroups'; include __DIR__ . '/include/navbar.php'; ?>   
 <?php include __DIR__ . '/include/header.php'; ?>
 
 <div id="root" class="dark-bg">
     <div style="right: 0; important;"></div>
-    <h1 class="tg-title">🔊 Talk Groups</h1>
-    
+    <h1 class="tg-title">🔊 <span data-i18n="tg.page_title">Talk Groups</span></h1>    
     <div class="tg-header-stats">
         <div class="tg-stat-card">
             <div class="tg-stat-info">
-                <div class="tg-stat-label">Total Talk Groups</div>
+            <div class="tg-stat-label" data-i18n="tg.total_label">Total Talk Groups</div>
                 <div class="tg-stat-value tg-total"><?php echo $totalTG; ?></div>
             </div>
         </div>
         
         <div class="tg-stat-card">
             <div class="tg-stat-info">
-                <div class="tg-stat-label">Last Active Talk Group</div>
-                <span class="tg-stat-value tg-active"><?php echo htmlspecialchars($tgselect ?: 'No Active TG'); ?></span>
+            <div class="tg-stat-label" data-i18n="tg.active_label">Last Active Talk Group</div>
+                <span class="tg-stat-value tg-active">
+                <?php if ($tgselect): ?>
+                    <?php echo htmlspecialchars($tgselect); ?>
+                <?php else: ?>
+                    <span data-i18n="tg.no_active">No Active TG</span>
+                <?php endif; ?>
+                </span>
             </div>
         </div>
     </div>
     
     <div class="tg-search-bar">
-        <input type="text" id="tg-search" class="tg-search-input" placeholder="🔍 Search by TG number or name...">
+    <input type="text" id="tg-search" class="tg-search-input" data-i18n-placeholder="tg.search_placeholder" placeholder="🔍 Search by TG number or name...">
     </div>
     
     <div class="tg-table-container">
         <table class="tg-table" id="tg-table">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>TG Number</th>
-                    <th>Talk Group Name</th>
+                <tr>
+                    <th data-i18n="tg.col_index">#</th>
+                    <th data-i18n="tg.col_number">TG Number</th>
+                    <th data-i18n="tg.col_name">Talk Group Name</th>
                 </tr>
             </thead>
             <tbody id="tg-table-body">
@@ -95,20 +103,19 @@ $totalTG = count($talkgroups);
                 ?>
                 <tr class="empty-row">
                     <td colspan="3" class="tg-empty">
-                        ⚠️ No Talk Group defined in <code class=cde>talkgroups.json</code>
+                        ⚠️ <span data-i18n="tg.empty_defined">No Talk Group defined in</span> <code class=cde>talkgroups.json</code>
                         <br><br>
-                        <small>Format: <code>'TG_NUMBER' => 'Talk Group Name'</code></small>
+                        <small><span data-i18n="tg.empty_format">Format:</span> <code>'TG_NUMBER' => 'Talk Group Name'</code></small>
                     </td>
                 </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
-    
     <div class="tg-note">
-        💡Any changes made to the <code class=cde>talkgroups.json</code> 
-        file will be automatically reflected in this table. Simply refresh this page by pressing the <code class=cde>F5</code> key.
-    </div>
+        <span data-i18n="tg.note_intro">💡 Any changes made to the</span> <code class=cde>talkgroups.json</code>
+        <span data-i18n="tg.note_outro">file will be automatically reflected in this table. Simply refresh this page by pressing the</span> <code class=cde>F5</code>
+    </div>    
 </div> 
 </div>
 
@@ -151,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (visibleCount === 0 && searchTerm !== '') {
                 const noResultRow = document.createElement('tr');
                 noResultRow.className = 'no-results-row';
-                noResultRow.innerHTML = '<td colspan="3" class="no-results">🔍 No Talk Groups found.</td>';
+                noResultRow.innerHTML = '<td colspan="3" class="no-results">' + t('tg.no_results', '🔍 No Talk Groups found.') + '</td>';
                 tbody.appendChild(noResultRow);
             }
         });

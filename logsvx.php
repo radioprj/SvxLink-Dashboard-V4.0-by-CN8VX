@@ -7,7 +7,6 @@
 
 require_once __DIR__ . '/include/config.php';
 require_once __DIR__ . '/include/functions.php';
-
 date_default_timezone_set(TIMEZONE);
 
 if (isset($_GET['log_json'])) {
@@ -251,9 +250,11 @@ function _rowClass(string $type): string {
     <title>SvxLink <?php echo htmlspecialchars($repeaterType ?? ''); ?> Repeater Log Viewer — <?php echo htmlspecialchars($CALLSIGN); ?></title>
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
+    <script src="scripts/i18n.js"></script>
     <script src="scripts/main.js"></script>
 </head>
 <body>
+<?php include __DIR__ . '/include/dash_config.php'; ?>
 <?php $activeNav = 'activity'; include __DIR__ . '/include/navbar.php'; ?> 
 <?php include __DIR__ . '/include/header.php'; ?>
 <div id="root" class="dark-bg">
