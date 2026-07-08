@@ -21,13 +21,13 @@
           <?php endif; ?>
 
           <div>
-              <div class="header-titles">SvxLink Dashboard for 
-                  <span class="repeater-type"><?php echo htmlspecialchars($repeaterType ?? ''); ?></span> Node :
+          <div class="header-titles"><span data-i18n="header.dashboard_for">SvxLink Dashboard for</span> 
+                  <span class="repeater-type"><?php echo htmlspecialchars($repeaterType ?? ''); ?></span> <span data-i18n="header.node">Node :</span>
                   <span class="header-callsign"><?php echo htmlspecialchars($CALLSIGN); ?></span>
               </div>
               <div class="header-subtitle">
                   <span class="block-icon">🗼</span><?php echo htmlspecialchars(DASHBOARD_SUBTITLE); ?>. 
-                  <span class="qth-icon">📍</span>QTH: <?php echo htmlspecialchars(HEADER_QTH); ?>.
+                  <span class="qth-icon">📍</span><span data-i18n="header.qth">QTH:</span> <?php echo htmlspecialchars(HEADER_QTH); ?>.
               </div>
           </div>
 

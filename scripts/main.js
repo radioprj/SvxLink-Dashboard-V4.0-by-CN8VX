@@ -714,26 +714,26 @@ function fetchUptime() {
         var dot   = document.getElementById('rxdot');
         var label = document.getElementById('statusLabel');
         var text  = document.getElementById('statusText');
-
         if (dot && label && text && data.status) {
             if (data.status === 'active') {
                 dot.className     = 'status-dot';
                 label.className   = 'status-label active';
-                text.textContent  = 'ACTIVE';
+                text.textContent  = t('header.status_active', 'ACTIVE');
             } else if (data.status === 'inactive') {
                 dot.className     = 'status-dot off';
                 label.className   = 'status-label inactive';
-                text.textContent  = 'STOPPED';
+                text.textContent  = t('header.status_stopped', 'STOPPED');
             } else if (data.status === 'idle') {
                 dot.className     = 'status-dot idle';
                 label.className   = 'status-label failed';
-                text.textContent  = 'IDLE';
+                text.textContent  = t('header.status_idle', 'IDLE');
             } else {
                 dot.className     = 'status-dot off';
                 label.className   = 'status-label';
-                text.textContent  = 'UNKNOWN';
+                text.textContent  = t('header.status_unknown', 'UNKNOWN');
             }
         }
+
     });
 }
 

@@ -263,8 +263,7 @@ function _rowClass(string $type): string {
   <div class="log-page-wrap">
     <form method="get" id="log-filter-form">
     <div class="log-toolbar">
-
-        <label for="f-type">Type</label>
+        <label for="f-type" data-i18n="log.filter_type">Type</label>
         <select name="type" id="f-type" onchange="this.form.submit()">
             <?php foreach (['all','tx-start','tx-stop','tg','warn','mod','link','unlink','info'] as $opt): ?>
             <option value="<?php echo $opt; ?>" <?php echo $filterType === $opt ? 'selected' : ''; ?>>
@@ -273,35 +272,35 @@ function _rowClass(string $type): string {
             <?php endforeach; ?>
         </select>
 
-        <label for="f-cs">Callsign</label>
-        <input type="text" id="f-cs" name="cs" placeholder="ex: CN8VX"
+        <label for="f-cs" data-i18n="log.filter_callsign">Callsign</label>
+        <input type="text" id="f-cs" name="cs" placeholder="ex: CN8VX" data-i18n-placeholder="log.placeholder_cs"
                value="<?php echo htmlspecialchars($filterCs); ?>" autocomplete="off">
 
-        <label for="f-tg">TG #</label>
-        <input type="text" id="f-tg" name="tg" placeholder="ex: 604"
+        <label for="f-tg" data-i18n="log.filter_tg">TG #</label>
+        <input type="text" id="f-tg" name="tg" placeholder="ex: 604" data-i18n-placeholder="log.placeholder_tg"
                value="<?php echo htmlspecialchars($filterTg); ?>" autocomplete="off">
 
-        <label for="f-date">Date</label>
+        <label for="f-date" data-i18n="log.filter_date">Date</label>
         <input type="date" id="f-date" name="date"
                value="<?php echo htmlspecialchars($filterDate); ?>"
-               title="Filtrer par date (00:00 → 23:59)">
+               title="Filter by date (00:00 → 23:59)">
 
-        <button type="submit" class="log-btn">🔍 Filter</button>
+        <button type="submit" class="log-btn"><span data-i18n="log.btn_filter">🔍 Filter</span></button>
 
         <?php if ($hasActiveFilter): ?>
-        <a href="logsvx.php" class="log-btn danger">✕ Reset</a>
+        <a href="logsvx.php" class="log-btn danger"><span data-i18n="log.btn_reset">✕ Reset</span></a>
         <?php endif; ?>
 
         <div class="toolbar-sep"></div>
 
         <?php if ($liveAllowed): ?>
         <button type="button" class="log-btn green" id="btn-live" onclick="toggleLive()">
-            <span class="live-dot" id="live-dot"></span>Live
+            <span class="live-dot" id="live-dot"></span><span data-i18n="log.live">Live</span>
         </button>
         <?php elseif ($hasActiveFilter): ?>
-        <span class="pag-live-off" title="Auto-Refresh désactivé lors d'un filtrage">Auto-Refresh OFF — filtered view</span>
+        <span class="pag-live-off" title="Auto-refresh disabled while filtering" data-i18n="log.autorefresh_off_filtered">Auto-Refresh OFF — filtered view</span>
         <?php else: ?>
-        <span class="pag-live-off">Auto-Refresh OFF — page <?php echo $currentPage; ?></span>
+        <span class="pag-live-off"><span data-i18n="log.autorefresh_off_page">Auto-Refresh OFF — page</span> <?php echo $currentPage; ?></span>
         <?php endif; ?>
 
     </div>
@@ -320,15 +319,15 @@ function _rowClass(string $type): string {
         </a>
         <?php endforeach; ?>
         <span style="flex:1"></span>
-        <span class="log-entries">Total Entries</span>
-        <span class="log-count-badge"><?php echo $totalEntries; ?> entries</span>
+        <span class="log-entries" data-i18n="log.total_entries">Total Entries</span>
+        <span class="log-count-badge"><?php echo $totalEntries; ?> <span data-i18n="log.entries_word">entries</span></span>
     </div>
 
     <div class="log-panel-header">
         <div class="log-panel-title">
-            <span class="log-entries-icon">📋</span>Log Entries
+            <span class="log-entries-icon">📋</span><span data-i18n="log.entries_title">Log Entries</span>
             <?php if ($hasActiveFilter): ?>
-                <span class="log-count-badge1">Filtered</span>
+                <span class="log-count-badge1" data-i18n="log.filtered_badge">Filtered</span>
             <?php endif; ?>
             <?php if ($filterDate !== ''): ?>
                 <span class="log-count-badge1 filtre-date">
@@ -339,12 +338,12 @@ function _rowClass(string $type): string {
         <?php if ($totalEntries > 0): ?>
             <div class="info-pag">
                 <?php if ($totalPages > 1): ?>
-                    Page <?php echo $currentPage; ?>/<?php echo $totalPages; ?> &nbsp;=>&nbsp;
+                    <span data-i18n="log.page_label">Page</span> <?php echo $currentPage; ?>/<?php echo $totalPages; ?> &nbsp;=>&nbsp;
                 <?php endif; ?>
-                <?php echo count($entries); ?> lines on <?php echo $totalEntries; ?> entries
+                <?php echo count($entries); ?> <span data-i18n="log.lines_on">lines on</span> <?php echo $totalEntries; ?> <span data-i18n="log.entries_word">entries</span>
             </div>
         <?php else: ?>
-            <div class="info-pag">0 entries</div>
+            <div class="info-pag">0 <span data-i18n="log.entries_word">entries</span></div>
         <?php endif; ?>
     </div>
 
@@ -358,18 +357,18 @@ function _rowClass(string $type): string {
       <table class="log-table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Type</th>
-            <th>Callsign</th>
-            <th>TG #</th>
-            <th>Message</th>
-            <th class="col-raw">Raw Line</th>
+            <th data-i18n="log.col_date">Date</th>
+            <th data-i18n="log.col_time">Time</th>
+            <th data-i18n="log.col_type">Type</th>
+            <th data-i18n="log.col_callsign">Callsign</th>
+            <th data-i18n="log.col_tg">TG #</th>
+            <th data-i18n="log.col_message">Message</th>
+            <th class="col-raw" data-i18n="log.col_raw">Raw Line</th>
           </tr>
         </thead>
         <tbody id="log-tbody">
           <?php if (empty($entries)): ?>
-          <tr><td colspan="7" class="log-empty">No log entries found.</td></tr>
+          <tr><td colspan="7" class="log-empty" data-i18n="log.no_entries">No log entries found.</td></tr>
           <?php else: ?>
           <?php foreach ($entries as $e): ?>
           <tr class="<?php echo _rowClass($e['type']); ?>">
@@ -404,13 +403,13 @@ function _rowClass(string $type): string {
     </div>
 
     <div class="pagination-info">
-        <span class="pag-info">
+       <span class="pag-info">
             <?php if ($totalPages > 1): ?>
-                Page <?php echo $currentPage; ?>/<?php echo $totalPages; ?>,
+                <span data-i18n="log.page_label">Page</span> <?php echo $currentPage; ?>/<?php echo $totalPages; ?>,
             <?php endif; ?>
-            <?php echo $totalEntries; ?> entries
+            <?php echo $totalEntries; ?> <span data-i18n="log.entries_word">entries</span>
             <?php if ($totalEntries > 0): ?>
-                — displaying <?php echo $offset + 1; ?> to <?php echo min($offset + LINES_PER_PAGE, $totalEntries); ?>
+                — <span data-i18n="log.displaying">displaying</span> <?php echo $offset + 1; ?> <span data-i18n="log.to">to</span> <?php echo min($offset + LINES_PER_PAGE, $totalEntries); ?>
             <?php endif; ?>
         </span>
     </div>
@@ -422,7 +421,7 @@ function _rowClass(string $type): string {
 
         <?php if ($currentPage > 1): ?>
         <a href="<?php echo htmlspecialchars(_buildPageUrl($currentPage - 1, $filterType, $filterCs, $filterTg, $filterDate)); ?>"
-           class="page-btn" aria-label="Previous">&laquo; Prev</a>
+           class="page-btn" aria-label="Previous"><span data-i18n="log.prev">&laquo; Prev</span></a>
         <?php endif; ?>
 
         <?php if ($currentPage > $window + 1): ?>
@@ -452,7 +451,7 @@ function _rowClass(string $type): string {
 
         <?php if ($currentPage < $totalPages): ?>
         <a href="<?php echo htmlspecialchars(_buildPageUrl($currentPage + 1, $filterType, $filterCs, $filterTg, $filterDate)); ?>"
-           class="page-btn" aria-label="Next">Next &raquo;</a>
+           class="page-btn" aria-label="Next"><span data-i18n="log.next">Next &raquo;</span></a>
         <?php endif; ?>
 
     </div>
@@ -520,10 +519,9 @@ function renderTable(entries) {
     var tbody = document.getElementById('log-tbody');
     if (!tbody) return;
     if (!entries.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="log-empty">No log entries found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="log-empty">' + t('log.no_entries', 'No log entries found.') + '</td></tr>';
         return;
     }
-
     var rcMap = {
         'tx-start': 'log-row-tx',
         'tx-stop':  'log-row-rx',
@@ -571,8 +569,8 @@ function toggleLive() {
     liveEnabled = !liveEnabled;
     var btn = document.getElementById('btn-live');
     if (liveEnabled) {
-        if (btn) {
-            btn.innerHTML = '<span class="live-dot" id="live-dot"></span>Live';
+    if (btn) {
+            btn.innerHTML = '<span class="live-dot" id="live-dot"></span>' + t('log.live', 'Live');
             btn.classList.remove('amber');
             btn.classList.add('green');
         }
@@ -580,7 +578,7 @@ function toggleLive() {
         fetchLogs();
     } else {
         if (btn) {
-            btn.innerHTML = '<span class="live-dot paused" id="live-dot"></span>Paused';
+            btn.innerHTML = '<span class="live-dot paused" id="live-dot"></span>' + t('log.paused', 'Paused');
             btn.classList.remove('green');
             btn.classList.add('amber');
         }
