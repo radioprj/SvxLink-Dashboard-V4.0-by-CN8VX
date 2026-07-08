@@ -34,7 +34,6 @@ pl: {
         'tg.note_outro':      'zostanie automatycznie odzwierciedlona w tej tabeli. Wystarczy odświeżyć stronę klawiszem',
         'tg.no_results':      '🔍 Nie znaleziono grup rozmów.',
     }
-    }
     // en: nie potrzebny — angielski to oryginalny tekst już w HTML
 };
 
@@ -53,10 +52,19 @@ function applyLang(lang) {
         el.textContent = (dict[key] !== undefined) ? dict[key] : el.dataset.i18nOrig;
     });
 
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+        if (el.dataset.i18nPlaceholderOrig === undefined) {
+            el.dataset.i18nPlaceholderOrig = el.getAttribute('placeholder') || '';
+        }
+
+        var key = el.getAttribute('data-i18n-placeholder');
+        el.setAttribute('placeholder',
+            (dict[key] !== undefined) ? dict[key] : el.dataset.i18nPlaceholderOrig);
+    });
+
     document.querySelectorAll('.lang-flag').forEach(function (btn) {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
-
     document.documentElement.setAttribute('lang', lang);
     try { localStorage.setItem(I18N_KEY, lang); } catch (e) {}
 }
