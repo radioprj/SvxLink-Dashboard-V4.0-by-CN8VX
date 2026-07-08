@@ -56,11 +56,13 @@ function startRealTimeClock() {
 
 function startClock() {
     function tick() {
-        var t = new Date().toLocaleTimeString('en-US', {
+        // Zmienna NIE może nazywać się "t" — przesłoniłaby globalną
+        // funkcję tłumaczącą t() z i18n.js wywoływaną niżej.
+        var timeStr = new Date().toLocaleTimeString('en-US', {
             hour: '2-digit', minute: '2-digit', hour12: false
         });
         var el = document.getElementById('header-clock');
-        if (el) el.textContent = 'Local Time: ' + t;
+        if (el) el.textContent = t('header.local_time', 'Local Time') + ': ' + timeStr;
     }
     tick();
     setInterval(tick, 1000);

@@ -72,6 +72,7 @@ pl: {
         'header.status_stopped': 'ZATRZYMANY',
         'header.status_idle':    'BEZCZYNNY',
         'header.status_unknown': 'NIEZNANY',
+        'header.local_time':     'Czas lokalny',
     }
     // en: nie potrzebny — angielski to oryginalny tekst już w HTML
 };

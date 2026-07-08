@@ -38,7 +38,7 @@ function live_cpuTemp(): string {
         $r = @file_get_contents($p);
         if ($r !== false) {
             $v = (int)trim($r);
-            if ($v > 0) return number_format($v / 1000.0, 1)+CPU_TEMP_OFFSET;
+            if ($v > 0) return number_format(($v / 1000.0) + CPU_TEMP_OFFSET, 1);
         }
     }
     return '';
