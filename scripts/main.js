@@ -853,7 +853,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setInterval(fetchUptime, 30 * 1000);
 
-    if (!repeaterFastPollTimer) {
+if (!repeaterFastPollTimer) {
         repeaterFastPollTimer = setInterval(function() {
             fetchJSON(JSON_ENDPOINT, function(data) {
                 if (data.repeater_runtime)                   updateRepeaterState(data.repeater_runtime);
@@ -864,4 +864,19 @@ document.addEventListener('DOMContentLoaded', function() {
             tickActiveDurations();
         }, 500);
     }
+
+    // Przeglądarki dławią/zamrażają setInterval() w kartach w tle —
+    // po powrocie na kartę wymuś natychmiastowe odświeżenie zamiast
+    // czekać na (potencjalnie zamrożony) kolejny tick interwału.
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState !== 'visible') return;
+
+        fetchStatus();
+        fetchUptime();
+        fetchHardware();
+        fetchHardwareLive();
+        fetchEcholink();
+        fetchRepeaterStatus();
+        if (document.getElementById('nodes-live')) fetchNodes();
+    });
 });
