@@ -75,7 +75,7 @@ pl: {
 
 	'index.freq_title':              'Częstotliwość RX / TX',
 	'index.offset':                  'Offset',
-	'index.trx_status':              'Status TRX Node',
+	'index.trx_status':              'Status TRX',
 	'index.modules_title':           'Moduły',
 	'index.no_modules':              'Brak załadowanych modułów',
 	'index.uptime_title':            'Czas pracy komputera',

@@ -89,7 +89,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
 
 <!-- ══ Repeater Status ═════════════════════ -->
     <div class="repeater-status-panel">
-      <div class="panel-label panel-bar"><span class="block-icon">🗼</span><span data-i18n="index.trx_status">TRX Node Status</span></div>
+      <div class="panel-label panel-bar"><span class="block-icon">🗼</span><span data-i18n="index.trx_status">TRX Status</span></div>
       <div class="rs-bar">
         <div class="rs-state <?php echo $repeaterStatus === 'tx' ? 'tx' : ($repeaterStatus === 'rx' ? 'rx' : 'listening'); ?> active" id="rs-main">
           <?php if ($repeaterStatus !== 'listening'): ?>
