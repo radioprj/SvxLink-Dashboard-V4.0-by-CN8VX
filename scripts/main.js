@@ -798,23 +798,22 @@ function updateRepeaterUI(data) {
     currentRepeaterStatus = data.status;
     rsMain.className = 'rs-state active ' + data.status;
 
-    if (data.status === 'tx') {
+  if (data.status === 'tx') {
     rsText.textContent = 'TX';
-    if (rsDesc)  rsDesc.textContent = data.description || 'TX - Transmitting';
+    if (rsDesc)  rsDesc.textContent = t(data.description_key, data.description || 'TX - Transmitting');
     if (rsDot)   { rsDot.style.display = 'inline-block'; rsDot.style; }
     if (rsPanel) rsPanel.className = 'repeater-status-panel red';
-} else if (data.status === 'rx') {
+  } else if (data.status === 'rx') {
     rsText.textContent = 'RX';
-    if (rsDesc)  rsDesc.textContent = data.description || 'RX - Receiving signal';
+    if (rsDesc)  rsDesc.textContent = t(data.description_key, data.description || 'RX - Receiving signal');
     if (rsDot)   { rsDot.style.display = 'inline-block'; rsDot; }
     if (rsPanel) rsPanel.className = 'repeater-status-panel green';
-} else {
+  } else {
     rsText.textContent = 'LISTENING';
-    if (rsDesc)  rsDesc.textContent = data.description || 'Waiting for activity';
+    if (rsDesc)  rsDesc.textContent = t(data.description_key, data.description || 'Listening - Waiting for activity');
     if (rsDot)   rsDot.style.display = 'none';
     if (rsPanel) rsPanel.className = 'repeater-status-panel';
-}
-
+   }
     rsMain.style.animation = 'pulse 0.5s ease-in-out 3';
     setTimeout(function() { if (rsMain) rsMain.style.animation = ''; }, 1500);
 }

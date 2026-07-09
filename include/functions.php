@@ -140,7 +140,7 @@ function getRepeaterStatus(): array {
     return dashboard_cached('repeater_status', 2, function () {
         $logPath = resolveLogPath();
         if (!is_readable($logPath) && !is_readable($logPath . '.1')) {
-            return ['status' => 'listening', 'description' => 'Listening - Log file not found'];
+            return ['status' => 'listening', 'description' => 'Listening - Log file not found', 'description_key' => 'rs.log_not_found'];
         }
 
         $lines = [];
@@ -152,10 +152,11 @@ function getRepeaterStatus(): array {
         $lines = array_slice($lines, -200);
 
         if (empty($lines)) {
-            return ['status' => 'listening', 'description' => 'Listening - No log data'];
+            return ['status' => 'listening', 'description' => 'Listening - No log data', 'description_key' => 'rs.no_log_data'];
         }
     $status           = 'listening';
     $description      = 'Listening - No recent activity';
+    $descriptionKey   = 'rs.no_recent_activity';
     $squelchOpen      = false;   
     $squelchWasClosed = false;   
     $isIdenting       = false;   
@@ -169,6 +170,7 @@ function getRepeaterStatus(): array {
             $squelchWasClosed = false;
             $status           = 'rx';
             $description      = 'RX - Receiving local RF signal';
+            $descriptionKey   = 'rs.rx_local';
             continue;
         }
 
@@ -177,6 +179,7 @@ function getRepeaterStatus(): array {
             $squelchWasClosed = true;
             $status           = 'listening';
             $description      = 'Waiting for activity';
+            $descriptionKey   = 'rs.idle';
             continue;
         }
 
@@ -190,12 +193,14 @@ function getRepeaterStatus(): array {
         if (stripos($line, 'Talker start') !== false) {
             if ($squelchOpen) {
                 // Squelch ouvert → radio locale → RX
-                $status      = 'rx';
-                $description = 'RX - Receiving local RF signal';
+                $status         = 'rx';
+                $description    = 'RX - Receiving local RF signal';
+                $descriptionKey = 'rs.rx_local';
             } else {
                 // Pas de squelch → réseau (EchoLink / Reflector) → TX
-                $status      = 'tx';
-                $description = 'TX - Retransmitting network audio';
+                $status         = 'tx';
+                $description    = 'TX - Retransmitting network audio';
+                $descriptionKey = 'rs.tx_network';
             }
             $isIdenting       = false;
             $squelchWasClosed = false;
@@ -205,6 +210,7 @@ function getRepeaterStatus(): array {
         if (stripos($line, 'Talker stop') !== false) {
             $status           = 'listening';
             $description      = 'Waiting for activity';
+            $descriptionKey   = 'rs.idle';
             $squelchWasClosed = false;
             continue;
         }
@@ -213,8 +219,9 @@ function getRepeaterStatus(): array {
             if ($isIdenting || $squelchWasClosed) {
                 continue;
             }
-            $status      = 'tx';
-            $description = 'TX - Transmitting';
+            $status         = 'tx';
+            $description    = 'TX - Transmitting';
+            $descriptionKey = 'rs.tx_local';
             continue;
         }
 
@@ -223,11 +230,12 @@ function getRepeaterStatus(): array {
             $squelchWasClosed = false;
             $status           = 'listening';
             $description      = 'Waiting for activity';
+            $descriptionKey   = 'rs.idle';
             continue;
         }
     }
 
-        return ['status' => $status, 'description' => $description];
+        return ['status' => $status, 'description' => $description, 'description_key' => $descriptionKey];
     });
 }
 // ============================================================

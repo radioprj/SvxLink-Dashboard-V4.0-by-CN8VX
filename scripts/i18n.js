@@ -117,6 +117,13 @@ pl: {
 	'index.cpu_usage_label':         'Wykorzystanie CPU',
 	'index.mem_usage_label':         'Wykorzystanie pamięci',
 	'index.disk_usage_label':        'Wykorzystanie dysku',
+	'rs.log_not_found':      'Nasłuch — plik logu nie znaleziony',
+	'rs.no_log_data':        'Nasłuch — brak danych w logu',
+	'rs.no_recent_activity': 'Nasłuch — brak ostatniej aktywności',
+	'rs.rx_local':           'RX — odbiór lokalnego sygnału RF',
+	'rs.idle':               'Oczekiwanie na aktywność',
+	'rs.tx_network':         'TX — retransmisja audio z sieci',
+	'rs.tx_local':           'TX — nadawanie',
        }
     // en: nie potrzebny — angielski to oryginalny tekst już w HTML
 };

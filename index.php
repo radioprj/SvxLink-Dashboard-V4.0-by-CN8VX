@@ -104,7 +104,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
           ?></span>
         </div>
       </div>
-      <div class="rs-desc" id="rs-desc"><?php echo htmlspecialchars($rsDesc); ?></div>
+     <div class="rs-desc" id="rs-desc" data-i18n="<?php echo htmlspecialchars($repeaterData['description_key'] ?? ''); ?>"><?php echo htmlspecialchars($rsDesc); ?></div>
     </div>
 
 <!-- ══ GRID LEFT : Modules actifs ═══════════════════════════ -->
