@@ -320,7 +320,7 @@ function _rowClass(string $type): string {
         <?php endforeach; ?>
         <span style="flex:1"></span>
         <span class="log-entries" data-i18n="log.total_entries">Total Entries</span>
-        <span class="log-count-badge"><?php echo $totalEntries; ?> <span data-i18n="log.entries_word">entries</span></span>
+        <span class="log-count-badge"><?php echo $totalEntries; ?> </span>
     </div>
 
     <div class="log-panel-header">
