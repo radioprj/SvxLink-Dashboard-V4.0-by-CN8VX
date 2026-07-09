@@ -176,7 +176,7 @@ function getRepeaterStatus(): array {
             $squelchOpen      = false;
             $squelchWasClosed = true;
             $status           = 'listening';
-            $description      = 'Listening - Waiting for activity';
+            $description      = 'Waiting for activity';
             continue;
         }
 
@@ -204,7 +204,7 @@ function getRepeaterStatus(): array {
 
         if (stripos($line, 'Talker stop') !== false) {
             $status           = 'listening';
-            $description      = 'Listening - Waiting for activity';
+            $description      = 'Waiting for activity';
             $squelchWasClosed = false;
             continue;
         }
@@ -222,7 +222,7 @@ function getRepeaterStatus(): array {
             $isIdenting       = false;
             $squelchWasClosed = false;
             $status           = 'listening';
-            $description      = 'Listening - Waiting for activity';
+            $description      = 'Waiting for activity';
             continue;
         }
     }
