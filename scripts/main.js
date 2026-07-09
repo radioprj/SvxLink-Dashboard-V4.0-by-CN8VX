@@ -315,14 +315,16 @@ function updateHardware(data) {
         updateProgressBar('disk-bar', diskPct, 100);
     }
 
-    if (data.hostname)        setEl('hw-hostname', data.hostname);
+  if (data.hostname)        setEl('hw-hostname', data.hostname);
     if (data.local_ip)        setEl('hw-local-ip', data.local_ip);
     if (data.cpu_arch)        setEl('hw-cpu-arch', data.cpu_arch);
     if (data.kernel)          setEl('hw-kernel',   data.kernel);
     if (data.linux_version)   setEl('hw-linux',    data.linux_version);
     if (data.svxlink_version) setEl('hw-svxlink',  data.svxlink_version);
-    if (data.system_uptime)   setEl('hw-uptime',   data.system_uptime);
-    
+    // Restart tickera (nie tylko setEl!) — resynchronizuje lokalny
+    // licznik ze świeżą wartością z serwera. Bez tego ticker po
+    // wybudzeniu karty nadpisuje tę wartość swoim zamrożonym stanem.
+    if (data.system_uptime)   startSysUptimeTicker(data.system_uptime);
 }
 
 // ════════════════════════════════════════════════════════
@@ -742,19 +744,6 @@ function fetchUptime() {
     });
 }
 
-// ════════════════════════════════════════════════════════
-//  UPTIME SYSTÈME — ticker local incrémental (suite)
-// ════════════════════════════════════════════════════════
-
-function startSysUptimeTicker(initialStr) {
-    _sysUptimeSeconds = parseSysUptime(initialStr || '0m');
-    if (_sysUptimeTimer) clearInterval(_sysUptimeTimer);
-    _sysUptimeTimer = setInterval(function() {
-        _sysUptimeSeconds++;
-        var el = document.getElementById('hw-uptime');
-        if (el) el.textContent = formatSysUptime(_sysUptimeSeconds);
-    }, 1000);
-}
 
 // ════════════════════════════════════════════════════════
 //  REPEATER STATUS (TX / RX / LISTENING) — fast polling
