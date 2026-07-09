@@ -810,7 +810,7 @@ function updateRepeaterUI(data) {
     if (rsPanel) rsPanel.className = 'repeater-status-panel green';
 } else {
     rsText.textContent = 'LISTENING';
-    if (rsDesc)  rsDesc.textContent = data.description || 'Listening - Waiting for activity';
+    if (rsDesc)  rsDesc.textContent = data.description || 'Waiting for activity';
     if (rsDot)   rsDot.style.display = 'none';
     if (rsPanel) rsPanel.className = 'repeater-status-panel';
 }
