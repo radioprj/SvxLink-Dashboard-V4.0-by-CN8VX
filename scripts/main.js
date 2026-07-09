@@ -12,6 +12,12 @@ var CFG = window.DASH_CONFIG || {
     default_theme: 'dark'
 };
 
+// Mapowanie języka dashboardu (i18n.js) → locale dla Date.toLocale*()
+var CLOCK_LOCALES = { en: 'en-US', pl: 'pl-PL' };
+function clockLocale() {
+    return CLOCK_LOCALES[typeof CURRENT_LANG !== 'undefined' ? CURRENT_LANG : 'en'] || 'en-US';
+}
+
 var scriptTag = document.querySelector('script[src*="main.js"]');
 var scriptSrc = scriptTag ? scriptTag.getAttribute('src') : 'scripts/main.js';
 var webRoot   = scriptSrc.indexOf('../') === 0 ? '../' : '';
@@ -34,17 +40,17 @@ var _lastCpuSnapshot = null;
 
 function startRealTimeClock() {
     function updateClock() {
-        var now = new Date();
+        var now    = new Date();
+        var locale = clockLocale();
 
-        var timeStr = now.toLocaleTimeString('en-US', {
+        var timeStr = now.toLocaleTimeString(locale, {
             hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
 
-        var dateStr = now.toLocaleDateString('en-US', {
+        var dateStr = now.toLocaleDateString(locale, {
             weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
         });
         dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-
         var timeEl = document.getElementById('clock-time');
         var dateEl = document.getElementById('clock-date');
         if (timeEl) timeEl.textContent = timeStr;
@@ -53,12 +59,11 @@ function startRealTimeClock() {
     updateClock();
     setInterval(updateClock, 1000);
 }
-
 function startClock() {
     function tick() {
         // Zmienna NIE może nazywać się "t" — przesłoniłaby globalną
         // funkcję tłumaczącą t() z i18n.js wywoływaną niżej.
-        var timeStr = new Date().toLocaleTimeString('en-US', {
+        var timeStr = new Date().toLocaleTimeString(clockLocale(), {
             hour: '2-digit', minute: '2-digit', hour12: false
         });
         var el = document.getElementById('header-clock');
