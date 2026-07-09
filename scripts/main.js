@@ -393,7 +393,7 @@ function renderQrzLink(callsign, qrzCallsign) {
 
 function renderNodesList(nodes) {
     if (!Array.isArray(nodes) || nodes.length === 0) {
-        return 'NO NODE CONNECTED';
+        return t('index.no_node_connected', 'NO NODE CONNECTED');
     }
     return nodes.map(function(node) {
         var base = node.replace(/-[LR]$/i, '');
@@ -477,21 +477,20 @@ function updateStatus(data) {
 
 function updateTgNodeList(tg) {
     if (!tg) return;
-
     var defEl = document.querySelector('#tg-default .node-ping');
-    if (defEl) defEl.textContent = tg.default || 'Not Defined';
+    if (defEl) defEl.textContent = tg.default || t('index.tg_not_defined', 'Not Defined');
 
     var monEl = document.querySelector('#tg-monitor .node-ping');
     if (monEl) {
         var monText = tg.monitor && tg.monitor.length
             ? tg.monitor.join(', ')
-            : 'No monitored TG';
+            : t('index.no_monitored_tg', 'No monitored TG');
         if (tg.tmp) monText += ' [tmp: ' + tg.tmp + ']';
         monEl.textContent = monText;
     }
 
     var actEl = document.querySelector('#tg-active .node-ping');
-    if (actEl) actEl.textContent = tg.selected || 'No Active TG';
+    if (actEl) actEl.textContent = tg.selected || t('tg.no_active', 'No Active TG');
 }
 
 // ════════════════════════════════════════════════════════
@@ -503,7 +502,7 @@ function updateModules(modules, activeModules) {
     var el = document.getElementById('modules-live');
     if (!el) return;
     if (!modules.length) {
-        el.innerHTML = '<span class="module-empty">No loaded modules</span>';
+        el.innerHTML = '<span class="module-empty">' + t('index.no_modules', 'No loaded modules') + '</span>';
         return;
     }
     var active = activeModules || [];
@@ -566,9 +565,8 @@ function renderReflectorCallsign(entry) {
 function updateReflectorActivity(entries) {
     var body = document.getElementById('reflector-activity-body');
     if (!body) return;
-
     if (!Array.isArray(entries) || entries.length === 0) {
-        body.innerHTML = '<tr><td colspan="5" class="card-empty">No activity found in the log.</td></tr>';
+        body.innerHTML = '<tr><td colspan="5" class="card-empty">' + t('index.no_activity', 'No activity found in the log.') + '</td></tr>';
         return;
     }
 
