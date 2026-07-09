@@ -8,31 +8,7 @@
  */
 
 // ============================================================
-// 1. FUSEAU HORAIRE / TIMEZONE
-// ============================================================
-
-// Set the default timezone
-// Définition du fuseau horaire par défaut
-// You can find timezones at: https://www.php.net/manual/en/timezones.php
-// Vous pouvez trouver les fuseaux horaires sur : https://www.php.net/manual/en/timezones.php
-// ========================================
-// TIMEZONE - odczytaj z systemu
-// ========================================
-if (file_exists('/etc/localtime')) {
-    $systemTimezone = readlink('/etc/localtime');
-    if ($systemTimezone !== false) {
-        $timezone = substr($systemTimezone, strpos($systemTimezone, 'zoneinfo/') + 9);
-        date_default_timezone_set($timezone);
-        define('TIMEZONE',$timezone);
-    }
-} else {
-    // Fallback
-    date_default_timezone_set('Europe/Warsaw');
-    define('TIMEZONE', 'Europe/Warsaw');
-}
-
-// ============================================================
-// 2. CHEMINS / PATHS
+// 1. CHEMINS / PATHS
 // ============================================================
 
 // Configuration files for SvxLink
@@ -44,7 +20,7 @@ define('SVXLINK_CONFIG', '/etc/svxlink/svxlink.conf');
 define('SVXLINK_LOG', '/var/log/svxlink');
 
 // ============================================================
-// 3. CONFIGURATION VISUELLE / VISUAL CONFIGURATION
+// 2. CONFIGURATION VISUELLE / VISUAL CONFIGURATION
 // ============================================================
 
 // Logo path / Chemin du logo
@@ -79,7 +55,7 @@ define('DEFAULT_LANG', 'pl');
 define('CPU_TEMP_OFFSET', '0');
 
 // ============================================================
-// 4. INFORMATIONS SYSOP / SYSOP INFORMATION
+// 3. INFORMATIONS SYSOP / SYSOP INFORMATION
 // ============================================================
 
 // System operator callsign
@@ -89,4 +65,25 @@ $SYSOP = "N0CALL";
 // System operator name
 // Nom du SYSOP
 $SYSOPNAME = "Name";
+
+
+// Set the default timezone
+// Définition du fuseau horaire par défaut
+// You can find timezones at: https://www.php.net/manual/en/timezones.php
+// Vous pouvez trouver les fuseaux horaires sur : https://www.php.net/manual/en/timezones.php
+// ========================================
+// TIMEZONE - odczytaj z systemu
+// ========================================
+if (file_exists('/etc/localtime')) {
+    $systemTimezone = readlink('/etc/localtime');
+    if ($systemTimezone !== false) {
+        $timezone = substr($systemTimezone, strpos($systemTimezone, 'zoneinfo/') + 9);
+        date_default_timezone_set($timezone);
+        define('TIMEZONE',$timezone);
+    }
+} else {
+    // Fallback
+    date_default_timezone_set('Europe/Warsaw');
+    define('TIMEZONE', 'Europe/Warsaw');
+}
 
