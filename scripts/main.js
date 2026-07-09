@@ -13,7 +13,7 @@ var CFG = window.DASH_CONFIG || {
 };
 
 // Mapowanie języka dashboardu (i18n.js) → locale dla Date.toLocale*()
-var CLOCK_LOCALES = { en: 'en-US', pl: 'pl-PL' };
+var CLOCK_LOCALES = { en: 'en-US', pl: 'pl-PL', fr: 'fr-FR', de: 'de-DE', es: 'es-ES' };
 function clockLocale() {
     return CLOCK_LOCALES[typeof CURRENT_LANG !== 'undefined' ? CURRENT_LANG : 'en'] || 'en-US';
 }
