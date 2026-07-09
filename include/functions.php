@@ -441,7 +441,8 @@ function parse_svxlink_config(string $filePath): array {
 // ============================================================
 function getSvxlinkStatus(): string {
     return dashboard_cached('svx_status', 10, function () {
-        return getPidByName('svxlink') !== 0 ? 'active' : 'inactive';
+        $out = shell_exec('systemctl is-active svxlink 2>/dev/null');
+        return trim($out !== null ? $out : 'unknown');
     });
 }
 
