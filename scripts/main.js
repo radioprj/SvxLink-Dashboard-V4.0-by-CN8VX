@@ -333,8 +333,9 @@ function updateHardware(data) {
 //  puis incrémente toutes les secondes en JS pur.
 // ════════════════════════════════════════════════════════
 
-var _sysUptimeSeconds = 0;  
-var _sysUptimeTimer   = null;
+var _sysUptimeBaseSeconds = 0;   // ostatnia znana wartość uptime z serwera (s)
+var _sysUptimeBaseTime    = 0;   // Date.now() w momencie jej otrzymania
+var _sysUptimeTimer       = null;
 
 function parseSysUptime(str) {
     var seconds = 0;
@@ -359,17 +360,22 @@ function formatSysUptime(seconds) {
 }
 
 function startSysUptimeTicker(initialStr) {
-    _sysUptimeSeconds = parseSysUptime(initialStr || '0m');
+    _sysUptimeBaseSeconds = parseSysUptime(initialStr || '0m');
+    _sysUptimeBaseTime    = Date.now();
 
     if (_sysUptimeTimer) clearInterval(_sysUptimeTimer);
 
+    // Liczymy na podstawie realnego upływu czasu (Date.now()), NIE na
+    // podstawie liczby odpalonych ticków — dzięki temu jest to odporne
+    // na dławienie/zamrażanie setInterval() w kartach w tle. Nawet
+    // jeśli ten tick odpali się raz na 4 minuty zamiast raz na sekundę,
+    // wynik i tak będzie poprawny.
     _sysUptimeTimer = setInterval(function() {
-        _sysUptimeSeconds++;
+        var elapsedSec = Math.floor((Date.now() - _sysUptimeBaseTime) / 1000);
         var el = document.getElementById('hw-uptime');
-        if (el) el.textContent = formatSysUptime(_sysUptimeSeconds);
+        if (el) el.textContent = formatSysUptime(_sysUptimeBaseSeconds + elapsedSec);
     }, 1000);
 }
-
 // ════════════════════════════════════════════════════════
 //  ECHOLINK
 //
