@@ -479,6 +479,7 @@ function updateStatus(data) {
     if (data.reflector_activity)                 updateReflectorActivity(data.reflector_activity);
     if (data.link_status)                        updateLinkStatus(data.link_status);
     if (data.tg_info)                            updateTgNodeList(data.tg_info);
+    if (data.reflector_callsign !== undefined)   updateReflectorCallsign(data.reflector_callsign);
 }
 
 // ════════════════════════════════════════════════════════
@@ -487,6 +488,11 @@ function updateStatus(data) {
 //           #tg-monitor .node-ping
 //           #tg-active  .node-ping
 // ════════════════════════════════════════════════════════
+
+function updateReflectorCallsign(callsign) {
+    var el = document.getElementById('callsign-reflector');
+    if (el) el.textContent = callsign ? escHtml(callsign) : 'No Defined';
+}
 
 function updateTgNodeList(tg) {
     if (!tg) return;

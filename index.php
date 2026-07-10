@@ -233,7 +233,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
         <div class="node-list">
           <div class="node-row">
             <span class="node-name" data-i18n="index.callsign_on_reflector">Callsign on Reflector</span>
-            <span class="node-ping callsign-reflector"><?php echo htmlspecialchars($callsignR); ?></span>
+            <span class="node-ping callsign-reflector" id="callsign-reflector"><?php echo htmlspecialchars($callsignR); ?></span>
           </div>
           <div class="node-row" id="tg-default">
             <span class="node-name" data-i18n="index.tg_default_label">TG Default</span>

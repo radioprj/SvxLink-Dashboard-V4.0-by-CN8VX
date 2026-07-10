@@ -1382,11 +1382,12 @@ if (isset($_GET['json'])) {
             : [];
         $tgTmp     = getSVXTGTMP();
 
-        return [
+return [
             'svx_status'           => getSvxlinkStatus(),
             'svx_uptime'           => getSvxlinkUptime(),
             'active_modules'       => getActiveModules(),
             'link_status'          => getSVXRstatus(),
+            'reflector_callsign'   => $rfConf['ReflectorLogic']['CALLSIGN'] ?? '',
             'ctcss'                => $ctcss,
             'modules'              => $modules,
             'repeater_runtime'     => $repeaterState,
