@@ -109,7 +109,7 @@ pl: {
 	'index.local_ip':                'Lokalne IP',
 	'index.architecture':            'Architektura',
 	'index.kernel':                  'Kernel',
-	'index.linux':                   'Linux',
+	'index.linux':                   'System Linux',
 	'index.svxlink_label':           'SvxLink',
 	'index.last_svx_restart':        'Ostatni restart SvxLink',
 	'index.cpu_cores':               'Rdzenie CPU',

@@ -362,7 +362,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
         </div>
 
         <div class="stat-row">
-          <span class="stat-key" data-i18n="index.linux">Linux</span>
+          <span class="stat-key" data-i18n="index.linux">OS Linux</span>
           <span class="stat-val" id="hw-linux"><?php echo htmlspecialchars($hw['linux_version']); ?></span>
         </div>
 
