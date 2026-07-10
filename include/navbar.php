@@ -25,20 +25,20 @@ $activeNav = $activeNav ?? 'dashboard';
             <li>
                 <a href="nodes.php" target="_blank" 
                    class="nav-link<?php echo $activeNav === 'nodes' ? ' active' : ''; ?>">
-                    🌐 Nodes
+                    🌐 <span data-i18n="nav.nodes">Nodes</span>
                 </a>
             </li>
 
             <li>
                 <a href="talkgroup.php" target="_blank" 
                    class="nav-link<?php echo $activeNav === 'talkgroups' ? ' active' : ''; ?>">
-                    🔊 Talk Groups
+                    🔊 <span data-i18n="nav.talkgroups">Talk Groups</span>
                 </a>
             </li>
             <li>
                 <a href="logsvx.php" target="_blank" rel="noopener noreferrer"
                    class="nav-link<?php echo $activeNav === 'activity' ? ' active' : ''; ?>">
-                    📋 Logs
+                    📋 <span data-i18n="nav.logs">Logs</span>
                 </a>
             </li>
 <!--            <?php if (!empty($elModActive)): ?>
