@@ -25,7 +25,7 @@ $CALLSIGN  = 'CALLSIGN';
 $LOGICS    = '';
 $LOGICSR   = '';
 $LOGICSC   = 'Not Connected';
-$callsignR = 'No Defined';
+$callsignR = 'Not Defined';
 $MODULES   = '';
 $CTCSS = '';
 

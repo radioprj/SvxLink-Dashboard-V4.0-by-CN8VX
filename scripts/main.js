@@ -491,7 +491,7 @@ function updateStatus(data) {
 
 function updateReflectorCallsign(callsign) {
     var el = document.getElementById('callsign-reflector');
-    if (el) el.textContent = callsign ? escHtml(callsign) : 'No Defined';
+    if (el) el.textContent = callsign ? escHtml(callsign) : 'Not Defined';
 }
 
 function updateTgNodeList(tg) {
