@@ -110,7 +110,7 @@ pl: {
 	'index.architecture':            'Architektura',
 	'index.kernel':                  'Kernel',
 	'index.linux':                   'System Linux',
-	'index.svxlink_label':           'SvxLink',
+	'index.svxlink_label':           'SvxLink wersja',
 	'index.last_svx_restart':        'Ostatni restart SvxLink',
 	'index.cpu_cores':               'Rdzenie CPU',
 	'index.cores_suffix':            'rdzenie',

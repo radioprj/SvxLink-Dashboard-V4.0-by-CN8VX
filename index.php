@@ -367,7 +367,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
         </div>
 
         <div class="stat-row">
-          <span class="stat-key" data-i18n="index.svxlink_label">SvxLink</span>
+          <span class="stat-key" data-i18n="index.svxlink_label">SvxLink version</span>
           <span class="stat-val" id="hw-svxlink"><?php echo htmlspecialchars($hw['svxlink_version']); ?></span>
         </div>
 
