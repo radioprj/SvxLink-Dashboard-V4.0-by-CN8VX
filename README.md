@@ -44,10 +44,14 @@ Następnie wykonaj:
     cd /etc/apache2/sites-enabled/
     ln -s /etc/apache2/sites-available/dash.conf dash.conf
 
-Zrób restart apache2 servwer
+Zrób restart apache2 server
 
     systemctl restart apache2
 
+Konfiguracja dashboard:
+
+	nano /var/www/dash/include/config.php
+	
 Możesz teraz zobaczyć dashbaord pisząc w przeglądarce: http://ip_adres_svxlink:8000
 Możesz np w firewall przekierować odwołanie z zewnątrz dla portu 80 na wewnętrzny port 8000
 dzięki temu udostepnisz dashbaord publicznie który nie posiada panelu admin
