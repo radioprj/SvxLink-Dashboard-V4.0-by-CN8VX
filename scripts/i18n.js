@@ -125,7 +125,9 @@ pl: {
 	'rs.tx_network':         'TX — retransmisja audio z sieci',
 	'rs.tx_local':           'TX — nadawanie',
        }
-    // en: nie potrzebny — angielski to oryginalny tekst już w HTML
+
+    // en: not need to create here  - english is in HTML code
+
 };
 
 function applyLang(lang) {
