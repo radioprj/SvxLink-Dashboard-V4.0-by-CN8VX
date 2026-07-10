@@ -96,13 +96,26 @@ function getSVXStatusLog(): array {
 
 function getSVXRstatus(): string {
     return dashboard_cached('svx_r_status', 5, function () {
-        $connectPatterns = ['Authentication OK', 'Connection established', 'Activating link'];
+        // Sygnał, że ReflectorLogic w ogóle się nie załadowała (np. brak
+        // CALLSIGN w konfiguracji) — to zawsze oznacza "Disconnected",
+        // niezależnie od pozostałych wzorców.
+        $failPatterns = [
+            'ReflectorLogic/CALLSIGN missing',
+            'Could not load or initialize Logic object "ReflectorLogic"',
+        ];
+        // UWAGA: "Activating link"/"Deactivating link" celowo NIE są tu
+        // używane — to sygnał LogicLinkingu (routing audio między
+        // logikami lokalnymi), niezależny od realnego stanu połączenia
+        // sieciowego do serwera SVXReflector. Odpala się nawet wtedy,
+        // gdy ReflectorLogic w ogóle się nie załadowała (patrz log
+        // z brakującym CALLSIGN — "Activating link" i tak wystąpił).
+        $connectPatterns = ['Authentication OK', 'Connection established'];
         $disconnectPatterns = [
             'Heartbeat timeout', 'No route to host', 'Connection refused',
             'Connection timed out', 'Locally ordered disconnect',
-            'Deactivating link', '"ReflectorLogic". Skipping',
+            '"ReflectorLogic". Skipping',
         ];
-        $allPatterns = array_merge($connectPatterns, $disconnectPatterns);
+        $allPatterns = array_merge($failPatterns, $connectPatterns, $disconnectPatterns);
 
         $paths = [SVXLINK_LOG, SVXLINK_LOG . '.1'];
 
@@ -115,12 +128,20 @@ function getSVXRstatus(): string {
             for ($i = count($lines) - 1; $i >= 0; $i--) {
                 $line = $lines[$i];
 
+                // Inne logiki (RepeaterLogic, EchoLink...) też logują
+                // "Activating link"/"Connection established" itp. —
+                // liczą się tylko linie dotyczące faktycznie reflektora.
+                if (stripos($line, 'reflector') === false) continue;
+
                 $matched = false;
                 foreach ($allPatterns as $pattern) {
                     if (strpos($line, $pattern) !== false) { $matched = true; break; }
                 }
                 if (!$matched) continue;
 
+                foreach ($failPatterns as $pattern) {
+                    if (strpos($line, $pattern) !== false) return 'Disconnected';
+                }
                 foreach ($connectPatterns as $pattern) {
                     if (strpos($line, $pattern) !== false) return 'Connected';
                 }
@@ -130,7 +151,7 @@ function getSVXRstatus(): string {
             }
         }
 
-        return 'No status';
+        return 'Disconnected';
     });
 }
 // ============================================================
