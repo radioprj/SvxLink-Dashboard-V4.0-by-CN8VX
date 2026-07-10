@@ -36,7 +36,7 @@ define('HEADER_QTH', 'Poland, Warsaw');
 
 // Frequency displayed in the header (leave empty to hide)
 // Fréquence RX/TX en MHz (saisie manuelle)
-define('FREQ_RX', '433.550');
+define('FREQ_RX', '---.---');
 
 // Frequency offset in kHz — positive or negative (e.g., -600 or +600). Leave empty if not applicable.
 // Offset en kHz — positif ou négatif (ex: -600 ou +600). Laisser '' si non applicable.
