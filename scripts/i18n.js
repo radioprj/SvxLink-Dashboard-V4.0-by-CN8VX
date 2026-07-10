@@ -113,7 +113,7 @@ pl: {
 	'index.svxlink_label':           'SvxLink',
 	'index.last_svx_restart':        'Ostatni restart SvxLink',
 	'index.cpu_cores':               'Rdzenie CPU',
-	'index.cores_suffix':            'Rdzeni',
+	'index.cores_suffix':            'rdzenie',
 	'index.cpu_usage_label':         'Wykorzystanie CPU',
 	'index.mem_usage_label':         'Wykorzystanie pamięci',
 	'index.disk_usage_label':        'Wykorzystanie dysku',
