@@ -162,8 +162,21 @@ function applyLang(lang) {
     document.documentElement.setAttribute('lang', lang);
     try { localStorage.setItem(I18N_KEY, lang); } catch (e) {}
 }
+// Strony/skrypty mogą się tu zarejestrować, żeby dostać sygnał
+// "język się zmienił" i odświeżyć dynamicznie renderowaną treść,
+// której applyLang() nie dotyka (bo nie ma data-i18n, tylko t()
+// wywoływane wewnątrz callbacków AJAX).
+var LANG_CHANGE_HOOKS = [];
+
+function onLangChange(fn) {
+    if (typeof fn === 'function') LANG_CHANGE_HOOKS.push(fn);
+}
+
 function setLang(lang) {
     applyLang(lang);
+    LANG_CHANGE_HOOKS.forEach(function (fn) {
+        try { fn(); } catch (e) { /* jeden zepsuty hook nie blokuje reszty */ }
+    });
 }
 
 // Bieżący język — do użytku przez main.js przy renderowaniu

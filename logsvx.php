@@ -563,6 +563,7 @@ function scheduleLive() {
         scheduleLive();
     }, LIVE_INT);
 }
+if (typeof onLangChange === 'function') onLangChange(fetchLogs);
 
 function toggleLive() {
     if (!LIVE_ALLOWED) return;

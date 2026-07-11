@@ -865,18 +865,28 @@ if (!repeaterFastPollTimer) {
         }, 500);
     }
 
-    // Przeglądarki dławią/zamrażają setInterval() w kartach w tle —
+// Przeglądarki dławią/zamrażają setInterval() w kartach w tle —
     // po powrocie na kartę wymuś natychmiastowe odświeżenie zamiast
     // czekać na (potencjalnie zamrożony) kolejny tick interwału.
     document.addEventListener('visibilitychange', function () {
         if (document.visibilityState !== 'visible') return;
-
-        fetchStatus();
-        fetchUptime();
-        fetchHardware();
-        fetchHardwareLive();
-        fetchEcholink();
-        fetchRepeaterStatus();
-        if (document.getElementById('nodes-live')) fetchNodes();
+        refreshAllPanels();
     });
+
+    // Ten sam zestaw odświeżeń przydaje się też zaraz po zmianie
+    // języka (kliknięcie flagi) — inaczej tekst wygenerowany przez
+    // t() w callbackach AJAX (status svxlink, opis przemiennika,
+    // status EchoLink...) zostaje w starym języku aż do kolejnego
+    // naturalnego cyklu odpytywania.
+    if (typeof onLangChange === 'function') onLangChange(refreshAllPanels);
 });
+
+function refreshAllPanels() {
+    fetchStatus();
+    fetchUptime();
+    fetchHardware();
+    fetchHardwareLive();
+    fetchEcholink();
+    fetchRepeaterStatus();
+    if (document.getElementById('nodes-live')) fetchNodes();
+}
