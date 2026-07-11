@@ -108,20 +108,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
      <div class="rs-desc" id="rs-desc" data-i18n="<?php echo htmlspecialchars($repeaterData['description_key'] ?? ''); ?>"><?php echo htmlspecialchars($rsDesc); ?></div>
     </div>
 
-<!-- ══ GRID LEFT : Modules actifs ═══════════════════════════ -->
-   <div class="module-panel">
-      <div class="panel-label panel-bar"><span class="block-icon">🔓</span><span data-i18n="index.modules_title">Modules</span></div>
-      <div class="module-list" id="modules-live">
-        <?php if (!empty($moduleLabels)): ?>
-          <?php foreach ($moduleLabels as $mod): ?>
-            <span class="module-badge<?php echo in_array($mod, $activeMods, true) ? ' active' : ''; ?>"><?php echo htmlspecialchars($mod); ?></span>
-          <?php endforeach; ?>
-          <?php else: ?>
-          <span class="module-empty" data-i18n="index.no_modules">No loaded modules</span>
-        <?php endif; ?>
-      </div>
-    </div>
-
+<!-- ══ GRID LEFT : logics actifs ═══════════════════════════ -->
     <div class="module-panel">
       <div class="panel-label panel-bar"><span class="block-icon">⚙️</span><span data-i18n="index.logics_title">Logics</span></div>
       <div class="module-list" id="logics-live">
@@ -135,6 +122,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
       </div>
     </div>
   </div>
+
 <!-- ══ GRID MAIN : Uptime / QSO / CPU Temp ══════════════════ -->
   <div class="grid-main">
 
@@ -156,11 +144,25 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
     </div>
 
 <!-- Horloge avec Date, Heure et Timezone -->
-    <div class="panel clock-panel" id="clock-panel">
+<!--    <div class="panel clock-panel" id="clock-panel">
       <div class="panel-label panel-bar"><span class="block-icon">⌚</span><span id="clock-date">-- --- ----</span></div>
       <div class="panel-value clock-value" id="clock-time">--:--:--</div>
       <div class="panel-sub">
         <span class="clock-tz" id="clock-tz"><?php echo htmlspecialchars(TIMEZONE); ?></span>
+      </div>
+    </div>
+-->
+<!-- ══ GRID LEFT : modules actifs ═══════════════════════════ -->
+   <div class="module-panel">
+      <div class="panel-label panel-bar"><span class="block-icon">🔓</span><span data-i18n="index.modules_title">Modules</span></div>
+      <div class="module-list" id="modules-live">
+        <?php if (!empty($moduleLabels)): ?>
+          <?php foreach ($moduleLabels as $mod): ?>
+            <span class="module-badge<?php echo in_array($mod, $activeMods, true) ? ' active' : ''; ?>"><?php echo htmlspecialchars($mod); ?></span>
+          <?php endforeach; ?>
+          <?php else: ?>
+          <span class="module-empty" data-i18n="index.no_modules">No loaded modules</span>
+        <?php endif; ?>
       </div>
     </div>
 
