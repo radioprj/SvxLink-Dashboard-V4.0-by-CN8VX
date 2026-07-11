@@ -38,27 +38,27 @@ var _lastCpuSnapshot = null;
 //  CLOCK — real-time, ticks every second
 // ════════════════════════════════════════════════════════
 
-function startRealTimeClock() {
-    function updateClock() {
-        var now    = new Date();
-        var locale = clockLocale();
-
-        var timeStr = now.toLocaleTimeString(locale, {
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        });
-
-        var dateStr = now.toLocaleDateString(locale, {
-            weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
-        });
-        dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-        var timeEl = document.getElementById('clock-time');
-        var dateEl = document.getElementById('clock-date');
-        if (timeEl) timeEl.textContent = timeStr;
-        if (dateEl) dateEl.textContent = dateStr;
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
-}
+//function startRealTimeClock() {
+//    function updateClock() {
+//        var now    = new Date();
+//        var locale = clockLocale();
+//
+//        var timeStr = now.toLocaleTimeString(locale, {
+//            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+//        });
+//
+//        var dateStr = now.toLocaleDateString(locale, {
+//            weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
+//        });
+//        dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+//        var timeEl = document.getElementById('clock-time');
+//        var dateEl = document.getElementById('clock-date');
+//        if (timeEl) timeEl.textContent = timeStr;
+//        if (dateEl) dateEl.textContent = dateStr;
+//    }
+//    updateClock();
+//    setInterval(updateClock, 1000);
+//}
 function startClock() {
     function tick() {
         // Zmienna NIE może nazywać się "t" — przesłoniłaby globalną
@@ -847,10 +847,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     initTheme();
-
     startClock();
-    startRealTimeClock();
 
+    fetchStatus();
     fetchHardware();
     fetchHardwareLive();
     fetchEcholink();
