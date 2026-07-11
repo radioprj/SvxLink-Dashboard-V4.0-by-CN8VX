@@ -13,6 +13,7 @@ $repeaterData   = getRepeaterStatus();
 $repeaterStatus = $repeaterData['status'];
 $rsDesc         = $repeaterData['description'];
 $activeMods     = getActiveModules();
+$svxLogics      = getSvxlinkLogics();
 
 $moduleLabels = !empty($MODULES)
     ? array_map(function ($m) {
@@ -115,8 +116,21 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
           <?php foreach ($moduleLabels as $mod): ?>
             <span class="module-badge<?php echo in_array($mod, $activeMods, true) ? ' active' : ''; ?>"><?php echo htmlspecialchars($mod); ?></span>
           <?php endforeach; ?>
-        <?php else: ?>
+          <?php else: ?>
           <span class="module-empty" data-i18n="index.no_modules">No loaded modules</span>
+        <?php endif; ?>
+      </div>
+    </div>
+
+    <div class="module-panel">
+      <div class="panel-label panel-bar"><span class="block-icon">⚙️</span><span data-i18n="index.logics_title">Logics</span></div>
+      <div class="module-list" id="logics-live">
+        <?php if (!empty($svxLogics)): ?>
+          <?php foreach ($svxLogics as $lg): ?>
+            <span class="module-badge<?php echo ($lg['status'] === 'skipped') ? ' warn' : ''; ?>"><?php echo htmlspecialchars($lg['name']); ?></span>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <span class="module-empty" data-i18n="index.no_logics">No logics configured</span>
         <?php endif; ?>
       </div>
     </div>

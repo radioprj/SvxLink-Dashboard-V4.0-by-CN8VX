@@ -507,6 +507,62 @@ function getSvxlinkStartTimestamp(): int {
     });
 }
 
+// ============================================================
+// LOGICS (SimplexLogic / RepeaterLogic / ReflectorLogic / ...)
+// Status ładowania logik skonfigurowanych w [GLOBAL] LOGICS=
+// ============================================================
+function getSvxlinkLogics(): array {
+    return dashboard_cached('svx_logics', 5, function () {
+        $config    = parse_svxlink_config(SVXLINK_CONFIG);
+        $logicsRaw = $config['GLOBAL']['LOGICS'] ?? '';
+        if (trim($logicsRaw) === '') return [];
+
+        $logicNames = array_filter(array_map('trim', explode(',', $logicsRaw)));
+        if (empty($logicNames)) return [];
+
+        // Kolejność ma znaczenie: .1 chronologicznie poprzedza bieżący
+        // plik — tak samo jak w getActiveModules()/getSVXReflectorNodes().
+        $paths = [SVXLINK_LOG . '.1', SVXLINK_LOG];
+        $lines = [];
+        foreach ($paths as $path) {
+            if (is_readable($path)) {
+                $lines = array_merge($lines, tail_lines($path, 3000));
+            }
+        }
+
+        $result = [];
+        foreach ($logicNames as $logic) {
+            $result[] = [
+                'name'   => $logic,
+                'status' => _detectLogicStatus($logic, $lines),
+            ];
+        }
+        return $result;
+    });
+}
+
+// Zwraca 'ok' | 'skipped' | 'unknown' dla pojedynczej logiki.
+// Skanujemy WSTECZ (najnowsze najpierw) — pierwsze trafienie wygrywa,
+// więc nie trzeba parsować/porównywać timestampów jak w oryginalnej
+// wersji — kolejność linii już to gwarantuje.
+function _detectLogicStatus(string $logic, array $lines): string {
+    if ($logic === 'ReflectorLogic') {
+        $okPattern   = 'ReflectorLogic: Connecting to service';
+        $skipPattern = '"ReflectorLogic". Skipping';
+    } else {
+        $okPattern   = $logic . ': Event handler script successfully loaded';
+        $skipPattern = '"' . $logic . '". Skipping';
+    }
+
+    for ($i = count($lines) - 1; $i >= 0; $i--) {
+        $line = $lines[$i];
+        if (strpos($line, $skipPattern) !== false) return 'skipped';
+        if (strpos($line, $okPattern) !== false)   return 'ok';
+    }
+
+    return 'unknown';
+}
+
 function getActiveModules(): array {
     return dashboard_cached('svx_active_modules', 4, function () {
         // Bierzemy pod uwagę tylko wpisy PO ostatnim starcie svxlink —
@@ -1386,6 +1442,7 @@ return [
             'svx_status'           => getSvxlinkStatus(),
             'svx_uptime'           => getSvxlinkUptime(),
             'active_modules'       => getActiveModules(),
+            'logics'               => getSvxlinkLogics(),
             'link_status'          => getSVXRstatus(),
             'reflector_callsign'   => $rfConf['ReflectorLogic']['CALLSIGN'] ?? '',
             'ctcss'                => $ctcss,
@@ -1466,3 +1523,4 @@ if (isset($_GET['nodes_json'])) {
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
+

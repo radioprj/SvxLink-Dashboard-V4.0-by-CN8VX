@@ -473,6 +473,8 @@ function updateStatus(data) {
     }
 
     if (data.modules)          updateModules(data.modules, data.active_modules);
+    if (data.logics)           updateLogics(data.logics);
+
     if (data.repeater_runtime) updateRepeaterState(data.repeater_runtime);
 
     if (data.reflector_current_tg !== undefined) updateReflectorCurrentTg(data.reflector_current_tg);
@@ -516,7 +518,6 @@ function updateTgNodeList(tg) {
 //  MODULES
 // ════════════════════════════════════════════════════════
 
-
 function updateModules(modules, activeModules) {
     var el = document.getElementById('modules-live');
     if (!el) return;
@@ -530,7 +531,22 @@ function updateModules(modules, activeModules) {
         return '<span class="' + cls + '">' + escHtml(m) + '</span>';
     }).join('');
 }
+// ════════════════════════════════════════════════════════
+//  LOGICS
+// ════════════════════════════════════════════════════════
 
+function updateLogics(logics) {
+    var el = document.getElementById('logics-live');
+    if (!el) return;
+    if (!logics.length) {
+        el.innerHTML = '<span class="module-empty">' + t('index.no_logics', 'No logics configured') + '</span>';
+        return;
+    }
+    el.innerHTML = logics.map(function(lg) {
+        var cls = 'module-badge' + (lg.status === 'skipped' ? ' warn' : '');
+        return '<span class="' + cls + '">' + escHtml(lg.name) + '</span>';
+    }).join('');
+}
 // ════════════════════════════════════════════════════════
 //  SVXREFLECTOR
 // ════════════════════════════════════════════════════════

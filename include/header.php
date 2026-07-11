@@ -35,13 +35,13 @@
     </div>
 
     <div class="status-row">
+        <span>
+            <div class="header-clock" id="header-clock">--:--</div>
+        </span>
         <div id="statusLabel" class="status-label">
           <span id="rxdot" class="status-dot"></span>
           <span id="statusText">--</span>
         </div>
-        <span>
-            <div class="header-clock" id="header-clock">--:--</div>
-        </span>
         <button class="theme-btn" id="theme-toggle" title="Change Theme" aria-label="Toggle dark/light theme">
           <span class="theme-icon">🌙</span>
         </button>

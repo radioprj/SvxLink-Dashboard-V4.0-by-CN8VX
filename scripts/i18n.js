@@ -118,6 +118,8 @@ pl: {
 	'index.cpu_usage_label':         'Wykorzystanie CPU',
 	'index.mem_usage_label':         'Wykorzystanie pamięci',
 	'index.disk_usage_label':        'Wykorzystanie dysku',
+	'index.logics_title':            'Logiki',
+	'index.no_logics':               'Brak skonfigurowanych logik',
 	'rs.log_not_found':      'Nasłuch — plik logu nie znaleziony',
 	'rs.no_log_data':        'Nasłuch — brak danych w logu',
 	'rs.no_recent_activity': 'Nasłuch — brak ostatniej aktywności',
