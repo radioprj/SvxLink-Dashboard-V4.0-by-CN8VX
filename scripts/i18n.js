@@ -48,6 +48,7 @@ pl: {
         'log.autorefresh_off_page':     'Auto-odświeżanie WYŁ — strona',
         'log.total_entries':    'Łączna liczba wpisów',
         'log.entries_title':    'Wpisy logu',
+        'log.entries_word':     'wpisów',
         'log.filtered_badge':   'Filtrowane',
         'log.page_label':       'Strona',
         'log.lines_on':         'linii z',

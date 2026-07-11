@@ -930,6 +930,11 @@ canvas#specCanvas { width: 100%; height: 50px; display: block; }
     font-weight: 600;
 }
 
+.el-connect-mode {
+    color: var(--accent2);
+    font-weight: 600;
+}
+
 .tg-default { color: var(--rf-tg-default); }
 .tg-monitor { color: var(--rf-tg-monitor); }
 .tg-active { color: var(--rf-tg-active); }
@@ -942,7 +947,10 @@ canvas#specCanvas { width: 100%; height: 50px; display: block; }
     color: var(--rf-red);
     font-weight: bold;
 }
-
+.status-banned {
+    color: var(--rf-amber);
+    font-weight: bold;
+}
 /* ─── 21. REPEATER STATUS PANEL ──────────────────────────── */
 .rs-bar {
     display: flex;
