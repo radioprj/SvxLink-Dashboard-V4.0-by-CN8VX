@@ -96,7 +96,7 @@ pl: {
 	'index.tg_not_defined':          'Nie zdefiniowano',
 	'index.tg_monitor_label':        'TG monitorowana',
 	'index.no_monitored_tg':         'Brak monitorowanej TG',
-	'index.last_active_tg_label':    'Ostatnia aktywna TG',
+	'index.last_active_tg_label':    'Aktywna TG',
 	'common.link_status':            'Status łącza',
 	'index.node_callsign_label':     'Znak wywoławczy na EL',
 	'index.node_location_label':     'INFO /QTH',

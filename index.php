@@ -269,7 +269,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
             </span>
           </div>
           <div class="node-row" id="tg-active">
-            <span class="node-name" data-i18n="index.last_active_tg_label">Last Active TG</span>
+            <span class="node-name" data-i18n="index.last_active_tg_label">Active TG</span>
             <span class="node-ping tg-active"><?php if ($tgselect): ?><?php echo htmlspecialchars($tgselect); ?><?php else: ?><span data-i18n="tg.no_active">No Active TG</span><?php endif; ?></span>
           </div>
           <div class="node-row" id="link-status">

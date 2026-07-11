@@ -382,7 +382,14 @@ function getSVXTGSelect(): string {
         }
         $line = end($matches) ?: '';
         if ($line !== '' && strpos($line, "TG #") !== false) {
-            return trim(substr($line, strpos($line, "#") + 1, 12));
+            $tg = trim(substr($line, strpos($line, "#") + 1, 12));
+            // TG 0 to w SvxLink umowny sentinel "brak wybranej TG",
+            // nie realna grupa rozmów. Normalizujemy do pustego stringa
+            // TU, żeby zarówno SSR jak i JSON (?json=1) dostawały
+            // spójną wartość — inaczej "0" jest falsy w PHP (SSR działa
+            // przypadkiem poprawnie), ale truthy w JS (main.js pokazuje
+            // je dosłownie po odświeżeniu AJAX).
+            return ($tg === '0') ? '' : $tg;
         }
         return '';
     });
