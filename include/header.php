@@ -34,15 +34,16 @@
       </div>
     </div>
 
-    <div class="status-row">
-        <span>
+<div class="status-row">
+        <div class="header-clock-wrap">
             <div class="header-clock" id="header-clock">--:--</div>
-        </span>
+            <div class="clock-tz" id="header-clock-tz"><?php echo htmlspecialchars(TIMEZONE); ?></div>
+        </div>
         <div id="statusLabel" class="status-label">
           <span id="rxdot" class="status-dot"></span>
           <span id="statusText">--</span>
         </div>
-        <button class="theme-btn" id="theme-toggle" title="Change Theme" aria-label="Toggle dark/light theme">
+        <button class="theme-btn" id="theme-toggle" title="Zmien Motyw" aria-label="Toggle dark/light theme">
           <span class="theme-icon">🌙</span>
         </button>
     </div>
