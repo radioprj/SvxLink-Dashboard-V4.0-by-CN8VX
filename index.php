@@ -332,7 +332,8 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
 
           <div class="node-row">
             <span class="node-name" data-i18n="index.nodes_connected_label">Nodes Connected</span>
-            <span class="node-ping" id="el-nodes">
+            <!-- <span class="node-ping" id="el-nodes"> -->
+            <span class="el-active" id="el-nodes">
               <?php if (!empty($elUsers)): ?>
                 <?php foreach ($elUsers as $ru):
                   $ruBase = preg_replace('/-[LR]$/i', '', $ru); ?>
@@ -342,13 +343,13 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
                   </a>
                 <?php endforeach; ?>
               <?php else: ?>
-                <span data-i18n="index.no_node_connected">NO NODE CONNECTED</span>
+                <span data-i18n="index.no_node_connected" class="tg-active">NO NODE CONNECTED</span>
               <?php endif; ?>
             </span>
           </div>
           <div class="node-row">
             <span class="node-name" data-i18n="index.connections_count_label">Number of Connections</span>
-            <span class="node-ping" id="el-count"><?php echo count($elUsers); ?></span>
+            <span class="node-count" id="el-count"><?php echo count($elUsers); ?></span>
           </div>
 
           <div class="node-row">
