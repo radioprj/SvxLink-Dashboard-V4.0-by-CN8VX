@@ -431,6 +431,16 @@ function updateEcholinkPanel(data) {
     setEl('el-count', String(data.connected_count || 0));
 
     setEl('el-proxy', data.proxy ? ('via PROXY ' + data.proxy) : 'Direct');
+    var txEl = document.getElementById('el-txing');
+    if (txEl) {
+        if (data.txing) {
+            txEl.innerHTML = renderQrzLink(data.txing, data.txing_qrz || '');
+            txEl.classList.add('echolink-txing');
+        } else {
+            txEl.innerHTML = '<span class="no-data">—</span>';
+            txEl.classList.remove('echolink-txing');
+        }
+    }
 
     var linkEl = document.getElementById('el-link-status');
     if (linkEl) {

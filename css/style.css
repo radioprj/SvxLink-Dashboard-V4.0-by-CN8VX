@@ -674,7 +674,11 @@ canvas#specCanvas { width: 100%; height: 50px; display: block; }
     animation: talkerPulse 1.2s ease-in-out infinite;
     width:80px;
 }
-
+.echolink-txing .callsign-link {
+    color: var(--rf-red);
+    font-weight: bold;
+    animation: talkerPulse 1.2s ease-in-out infinite;
+}
 /* ─── 13. BADGES ─────────────────────────────────────────── */
 .badge {
     font-size: 10px;

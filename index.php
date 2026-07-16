@@ -311,6 +311,25 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
             <span class="node-ping" id="el-sysop"><?php echo htmlspecialchars($elSysopName); ?></span>
           </div>
 
+
+          <div class="node-row">
+            <span class="node-name" data-i18n="index.connected_mode_label">Connected</span>
+            <span class="node-ping el-connect-mode" id="el-proxy">
+              <?php echo $elProxy !== '' ? 'via PROXY ' . htmlspecialchars($elProxy) : 'Direct'; ?>
+            </span>
+          </div>
+
+          <div class="node-row">
+            <span class="node-name" data-i18n="common.link_status">Link Status</span>
+            <?php
+                $elLinkClass = ($elStatusLink === 'Connected') ? 'status-connected'
+                             : (($elStatusLink === 'Banned') ? 'status-banned' : 'status-disconnected');
+            ?>
+            <span class="node-ping link-status-value <?php echo $elLinkClass; ?>" id="el-link-status">
+              <?php echo htmlspecialchars($elStatusLink); ?>
+            </span>
+          </div>
+
           <div class="node-row">
             <span class="node-name" data-i18n="index.nodes_connected_label">Nodes Connected</span>
             <span class="node-ping" id="el-nodes">
@@ -333,20 +352,17 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
           </div>
 
           <div class="node-row">
-            <span class="node-name" data-i18n="index.connected_mode_label">Connected</span>
-            <span class="node-ping el-connect-mode" id="el-proxy">
-              <?php echo $elProxy !== '' ? 'via PROXY ' . htmlspecialchars($elProxy) : 'Direct'; ?>
-            </span>
-          </div>
-
-          <div class="node-row">
-            <span class="node-name" data-i18n="common.link_status">Link Status</span>
-            <?php
-                $elLinkClass = ($elStatusLink === 'Connected') ? 'status-connected'
-                             : (($elStatusLink === 'Banned') ? 'status-banned' : 'status-disconnected');
-            ?>
-            <span class="node-ping link-status-value <?php echo $elLinkClass; ?>" id="el-link-status">
-              <?php echo htmlspecialchars($elStatusLink); ?>
+            <span class="node-name" data-i18n="index.echolink_txing_label">EchoLink TXing</span>
+            <span class="node-ping<?php echo $elTxing !== '' ? ' echolink-txing' : ''; ?>" id="el-txing">
+              <?php if ($elTxing !== ''):
+                  $elTxingBase = preg_replace('/-[LR]$/i', '', $elTxing); ?>
+                <a href="https://www.qrz.com/db/<?php echo urlencode($elTxingBase); ?>"
+                   target="_blank" class="callsign-link">
+                  <?php echo str_replace('0', '&Oslash;', htmlspecialchars($elTxing)); ?>
+                </a>
+              <?php else: ?>
+                <span class="no-data">—</span>
+              <?php endif; ?>
             </span>
           </div>
 

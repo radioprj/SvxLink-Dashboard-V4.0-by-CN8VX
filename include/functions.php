@@ -211,22 +211,22 @@ function getRepeaterStatus(): array {
             continue;
         }
 
-        if (stripos($line, 'Talker start') !== false) {
-            if ($squelchOpen) {
-                // Squelch ouvert → radio locale → RX
-                $status         = 'rx';
-                $description    = 'RX - Receiving local RF signal';
-                $descriptionKey = 'rs.rx_local';
-            } else {
-                // Pas de squelch → réseau (EchoLink / Reflector) → TX
-                $status         = 'tx';
-                $description    = 'TX - Retransmitting network audio';
-                $descriptionKey = 'rs.tx_network';
-            }
-            $isIdenting       = false;
-            $squelchWasClosed = false;
-            continue;
-        }
+//        if (stripos($line, 'Talker start') !== false) {
+//            if ($squelchOpen) {
+//                // Squelch ouvert → radio locale → RX
+//                $status         = 'rx';
+//                $description    = 'RX - Receiving local RF signal';
+//                $descriptionKey = 'rs.rx_local';
+//            } else {
+//                // Pas de squelch → réseau (EchoLink / Reflector) → TX
+//                $status         = 'tx';
+//                $description    = 'TX - Retransmitting network audio';
+//                $descriptionKey = 'rs.tx_network';
+//            }
+//            $isIdenting       = false;
+//            $squelchWasClosed = false;
+//            continue;
+//        }
 
         if (stripos($line, 'Talker stop') !== false) {
             $status           = 'listening';
@@ -305,21 +305,40 @@ function getConnectedEcholink(array $echolog): array {
 
 function getEchoLinkTX(): string {
     return dashboard_cached('echolink_tx', 5, function () {
-        $matches = [];
+        $startTime = getSvxlinkStartTimestamp();
+
+        $lastTxTimestamp = 0;
+        $lastTxCallsign  = '';
+        $lastTxStatus    = null; // 'start' | 'stop'
+
         foreach ([SVXLINK_LOG . '.1', SVXLINK_LOG] as $path) {
-            if (file_exists($path)) {
-                $matches = array_merge($matches, tail_grep($path, 10000, '/### EchoLink/'));
+            if (!is_readable($path)) continue;
+
+            $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines === false) continue;
+
+            foreach ($lines as $line) {
+                if (strpos($line, 'EchoLink talker') === false) continue;
+
+                if (!preg_match('/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $line, $m)) continue;
+                $timestamp = strtotime($m[1]);
+                if ($timestamp === false || $timestamp < $startTime) continue;
+
+                // >= (nie >) celowo: przy dwóch zdarzeniach w tej samej
+                // sekundzie (start i stop tuż po sobie) wygrywa to,
+                // które jest fizycznie później w pliku — poprawny stan.
+                if ($timestamp >= $lastTxTimestamp
+                    && preg_match('/EchoLink talker (start|stop)\s+([A-Z0-9\-]+)/i', $line, $tm)) {
+                    $lastTxStatus    = strtolower($tm[1]);
+                    $lastTxCallsign  = $tm[2];
+                    $lastTxTimestamp = $timestamp;
+                }
             }
         }
-        $line = end($matches) ?: '';
 
-        if ($line !== '' && strpos($line, "talker start") !== false) {
-            return trim(substr($line, strpos($line, "start") + 6, 12));
-        }
-        return '';
+        return ($lastTxStatus === 'start') ? $lastTxCallsign : '';
     });
 }
-
 // ============================================================
 // ECHOLINK — link status wobec serwera katalogowego/proxy
 // (Connected / Banned / Disconnected). Ten sam wzorzec co
@@ -678,19 +697,24 @@ if (isset($_GET['echolink_json'])) {
             $elProxy     = trim($elConfig['ModuleEchoLink']['PROXY_SERVER'] ?? '');
         }
 
+        $elTxing = '';
         if (isProcessRunning('svxlink')) {
             $log          = getEchoLog();
             $elUsers      = getConnectedEcholink($log);
             $elLinkStatus = getEchoLinkConnect();
+            $elTxing      = getEchoLinkTX();
         }
 
-        $elCallsignQrz = preg_replace('/-[LR]$/i', '', $elCallsign);
+        $elCallsignQrz  = preg_replace('/-[LR]$/i', '', $elCallsign);
+        $elTxingQrz     = preg_replace('/-[LR]$/i', '', $elTxing);
 
         return [
             'callsign'        => $elCallsign,
             'callsign_qrz'    => $elCallsignQrz,
             'sysop'           => $elSysopName,
             'location'        => $elLocation,
+            'txing'           => $elTxing,
+            'txing_qrz'       => $elTxingQrz,
             'proxy'           => $elProxy,
             'connected_nodes' => $elUsers,
             'connected_count' => count($elUsers),
