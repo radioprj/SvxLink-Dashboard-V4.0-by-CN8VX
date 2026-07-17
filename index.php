@@ -143,15 +143,6 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
       <div class="panel-sub" data-i18n="index.cpu_for_sbc">CPU for SBC</div>
     </div>
 
-<!-- Horloge avec Date, Heure et Timezone -->
-<!--    <div class="panel clock-panel" id="clock-panel">
-      <div class="panel-label panel-bar"><span class="block-icon">⌚</span><span id="clock-date">-- --- ----</span></div>
-      <div class="panel-value clock-value" id="clock-time">--:--:--</div>
-      <div class="panel-sub">
-        <span class="clock-tz" id="clock-tz"><?php echo htmlspecialchars(TIMEZONE); ?></span>
-      </div>
-    </div>
--->
 <!-- ══ GRID LEFT : modules actifs ═══════════════════════════ -->
    <div class="module-panel">
       <div class="panel-label panel-bar"><span class="block-icon">🔓</span><span data-i18n="index.modules_title">Modules</span></div>
@@ -378,25 +369,10 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
           <span class="stat-key" data-i18n="index.hostname">Hostname</span>
           <span class="stat-val" id="hw-hostname"><?php echo htmlspecialchars($hw['hostname']); ?></span>
         </div>
-
-        <div class="stat-row">
-          <span class="stat-key" data-i18n="index.local_ip">Local IP</span>
-          <span class="stat-val" id="hw-local-ip"><?php echo htmlspecialchars($hw['local_ip']); ?></span>
-        </div>
-
+          
         <div class="stat-row">
           <span class="stat-key" data-i18n="index.architecture">Architecture</span>
           <span class="stat-val" id="hw-cpu-arch"><?php echo htmlspecialchars($hw['cpu_arch']); ?></span>
-        </div>
-
-        <div class="stat-row">
-          <span class="stat-key" data-i18n="index.kernel">Kernel</span>
-          <span class="stat-val" id="hw-kernel"><?php echo htmlspecialchars($hw['kernel']); ?></span>
-        </div>
-
-        <div class="stat-row">
-          <span class="stat-key" data-i18n="index.linux">OS Linux</span>
-          <span class="stat-val" id="hw-linux"><?php echo htmlspecialchars($hw['linux_version']); ?></span>
         </div>
 
         <div class="stat-row">
