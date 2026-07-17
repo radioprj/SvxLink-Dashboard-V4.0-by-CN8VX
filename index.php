@@ -364,17 +364,7 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
 <!-- ══ Hardware Info ════════════════════════════ -->
       <div class="panel">
         <div class="panel-label panel-bar"><span class="block-icon">📟</span><span data-i18n="index.hw_title">Hardware Info</span></div>
-
-        <div class="stat-row">
-          <span class="stat-key" data-i18n="index.hostname">Hostname</span>
-          <span class="stat-val" id="hw-hostname"><?php echo htmlspecialchars($hw['hostname']); ?></span>
-        </div>
           
-        <div class="stat-row">
-          <span class="stat-key" data-i18n="index.architecture">Architecture</span>
-          <span class="stat-val" id="hw-cpu-arch"><?php echo htmlspecialchars($hw['cpu_arch']); ?></span>
-        </div>
-
         <div class="stat-row">
           <span class="stat-key" data-i18n="index.svxlink_label">SvxLink version</span>
           <span class="stat-val" id="hw-svxlink"><?php echo htmlspecialchars($hw['svxlink_version']); ?></span>
@@ -385,6 +375,16 @@ $rfActivity = $rfActive ? getReflectorActivity(50) : [];
           <span class="stat-val" id="svx-uptime"><?php echo htmlspecialchars($svxUptime !== '' ? $svxUptime : '--'); ?></span>
         </div>
 
+        <div class="stat-row">
+          <span class="stat-key" data-i18n="index.hostname">Hostname</span>
+          <span class="stat-val" id="hw-hostname"><?php echo htmlspecialchars($hw['hostname']); ?></span>
+        </div>
+          
+        <div class="stat-row">
+          <span class="stat-key" data-i18n="index.architecture">Architecture</span>
+          <span class="stat-val" id="hw-cpu-arch"><?php echo htmlspecialchars($hw['cpu_arch']); ?></span>
+        </div>
+          
         <div class="stat-row">
           <span class="stat-key" data-i18n="index.cpu_cores">CPU Cores</span>
           <span class="stat-val" id="hw-cpu-cores"><?php echo htmlspecialchars($hw['cpu_cores'] ?? 'N/A'); ?> <span data-i18n="index.cores_suffix">Cores</span></span>
