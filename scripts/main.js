@@ -64,7 +64,8 @@ function startClock() {
         // Zmienna NIE może nazywać się "t" — przesłoniłaby globalną
         // funkcję tłumaczącą t() z i18n.js wywoływaną niżej.
         var timeStr = new Date().toLocaleTimeString(clockLocale(), {
-            hour: '2-digit', minute: '2-digit', hour12: false
+            hour: '2-digit', minute: '2-digit', hour12: false,
+            timeZone: (CFG && CFG.timezone) ? CFG.timezone : undefined
         });
         var el = document.getElementById('header-clock');
         if (el) el.textContent = t('header.local_time', 'Local Time') + ': ' + timeStr;
@@ -72,7 +73,6 @@ function startClock() {
     tick();
     setInterval(tick, 1000);
 }
-
 // ════════════════════════════════════════════════════════
 //  UTILITIES
 // ════════════════════════════════════════════════════════
