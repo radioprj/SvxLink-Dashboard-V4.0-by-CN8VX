@@ -38,8 +38,8 @@ define('HEADER_QTH', 'Poland, Warsaw');
 // Fréquence RX/TX en MHz (saisie manuelle)
 define('FREQ_RX', '---.---');
 
-// Frequency offset in kHz — positive or negative (e.g., -600 or +600). Leave empty if not applicable.
-// Offset en kHz — positif ou négatif (ex: -600 ou +600). Laisser '' si non applicable.
+// Frequency offset in MHz — positive or negative (e.g., -0.6 or +0.6 or +5). Leave empty if not applicable.
+// Offset en MHz — positif ou négatif (ex: -0.6 ou +0.6). Laisser '' si non applicable.
 define('FREQ_OFFSET', '');
 
 // Default theme on page load: 'dark' or 'light'
