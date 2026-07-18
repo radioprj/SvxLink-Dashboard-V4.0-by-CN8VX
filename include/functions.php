@@ -228,13 +228,13 @@ function getRepeaterStatus(): array {
 //            continue;
 //        }
 
-        if (stripos($line, 'Talker stop') !== false) {
-            $status           = 'listening';
-            $description      = 'Waiting for activity';
-            $descriptionKey   = 'rs.idle';
-            $squelchWasClosed = false;
-            continue;
-        }
+//        if (stripos($line, 'Talker stop') !== false) {
+//            $status           = 'listening';
+//            $description      = 'Waiting for activity';
+//            $descriptionKey   = 'rs.idle';
+//            $squelchWasClosed = false;
+//            continue;
+//        }
 
         if (stripos($line, 'Turning the transmitter ON') !== false) {
             if ($isIdenting || $squelchWasClosed) {

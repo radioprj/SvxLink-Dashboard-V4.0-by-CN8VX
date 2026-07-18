@@ -7,24 +7,6 @@
  * ============================================================
  */
 
-// ============================================================
-// 1. CHEMINS / PATHS
-// ============================================================
-
-// Configuration files for SvxLink
-// Fichier de configuration SvxLink
-define('SVXLINK_CONFIG', '/etc/svxlink/svxlink.conf');
-
-// log file for SvxLink
-// Fichier de log SvxLink
-define('SVXLINK_LOG', '/var/log/svxlink');
-
-// ============================================================
-// 2. CONFIGURATION VISUELLE / VISUAL CONFIGURATION
-// ============================================================
-
-// Logo path / Chemin du logo
-define('LOGO_PATH', 'images/logo.png');
 
 // tile / subtitle of the dashboard
 // Titre / Sous-titre du dashboard
@@ -66,6 +48,21 @@ $SYSOP = "N0CALL";
 // Nom du SYSOP
 $SYSOPNAME = "Name";
 
+
+// ============================================================
+// CHEMINS / PATHS
+// ============================================================
+
+// Configuration files for SvxLink
+// Fichier de configuration SvxLink
+define('SVXLINK_CONFIG', '/etc/svxlink/svxlink.conf');
+
+// log file for SvxLink
+// Fichier de log SvxLink
+define('SVXLINK_LOG', '/var/log/svxlink');
+
+// Logo path / Chemin du logo
+define('LOGO_PATH', 'images/logo.png');
 
 // Set the default timezone
 // Définition du fuseau horaire par défaut
