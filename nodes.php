@@ -16,6 +16,7 @@ $connectedNodes = getSVXReflectorNodes();
 $activeTalkers  = getActiveTalkerCallsigns();
 $totalNodes     = count($connectedNodes);
 ?>
+<?php include __DIR__ . '/include/dash_config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +29,6 @@ $totalNodes     = count($connectedNodes);
     <script src="scripts/main.js"></script>
 </head>
 <body>
-<?php include __DIR__ . '/include/dash_config.php'; ?>
 <?php $activeNav = 'nodes'; include __DIR__ . '/include/navbar.php'; ?>
 <?php include __DIR__ . '/include/header.php'; ?>
 
