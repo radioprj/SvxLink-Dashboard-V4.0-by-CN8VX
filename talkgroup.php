@@ -31,6 +31,7 @@ ksort($talkgroups, SORT_NUMERIC);
 
 $totalTG = count($talkgroups);
 ?>
+<?php include __DIR__ . '/include/dash_config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,10 +44,9 @@ $totalTG = count($talkgroups);
     <script src="scripts/main.js"></script>
 </head>
 <body>
-<?php include __DIR__ . '/include/dash_config.php'; ?>
+
 <?php $activeNav = 'talkgroups'; include __DIR__ . '/include/navbar.php'; ?>   
 <?php include __DIR__ . '/include/header.php'; ?>
-
 <div id="root" class="dark-bg">
     <div style="right: 0; important;"></div>
     <h1 class="tg-title">🔊 <span data-i18n="tg.page_title">Talk Groups</span></h1>    
