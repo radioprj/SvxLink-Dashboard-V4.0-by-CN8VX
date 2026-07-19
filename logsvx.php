@@ -242,6 +242,7 @@ function _rowClass(string $type): string {
     };
 }
 ?>
+<?php include __DIR__ . '/include/dash_config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -254,7 +255,6 @@ function _rowClass(string $type): string {
     <script src="scripts/main.js"></script>
 </head>
 <body>
-<?php include __DIR__ . '/include/dash_config.php'; ?>
 <?php $activeNav = 'activity'; include __DIR__ . '/include/navbar.php'; ?> 
 <?php include __DIR__ . '/include/header.php'; ?>
 <div id="root" class="dark-bg">
