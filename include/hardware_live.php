@@ -66,8 +66,9 @@ function live_memInfo(): array {
 }
 
 function live_diskInfo(): array {
-    $tot  = @disk_total_space('/');
-    $free = @disk_free_space('/');
+    $path = is_dir('/media/root-ro') ? '/media/root-ro' : '/';
+    $tot  = disk_total_space($path);
+    $free = disk_free_space($path);
     if ($tot === false || $free === false || $tot <= 0) return [];
     $used = (float)$tot - (float)$free;
     return [
