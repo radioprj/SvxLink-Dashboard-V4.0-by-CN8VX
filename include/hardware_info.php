@@ -122,8 +122,9 @@ function hw_memInfo(): array {
 
 /* ── Disk ────────────────────────────────────────────────────── */
 function hw_diskInfo(): array {
-    $tot  = @disk_total_space('/');
-    $free = @disk_free_space('/');
+    $path = is_dir('/media/root-ro') ? '/media/root-ro' : '/';
+    $tot  = disk_total_space($path);
+    $free = disk_free_space($path);
     if ($tot !== false && $free !== false && $tot > 0) {
         $used = (float)$tot - (float)$free;
         return [
@@ -133,7 +134,7 @@ function hw_diskInfo(): array {
             'percent' => (int)round(($used / $tot) * 100),
         ];
     }
-    $o = hw_cmd('df -B1 / | tail -1');
+    $o = hw_cmd('df -B1 ' . escapeshellarg($path) . ' | tail -1');
     if ($o === '') return [];
     $p = preg_split('/\s+/', $o);
     if (count($p) < 5) return [];
