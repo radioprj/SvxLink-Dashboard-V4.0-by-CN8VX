@@ -25,22 +25,15 @@ function hw_cmd(string $cmd) {
 }
 
 /* ── CPU usage ───────────────────────────────────────────────── */
+// Load average (1 min) 
 function hw_cpuUsage(): float {
-    if (!is_readable('/proc/stat')) return 0.0;
+    $load = sys_getloadavg();
+    if ($load === false) return 0.0;
 
-    $read = function (): array {
-        $c = @file_get_contents('/proc/stat');
-        if ($c === false) return ['t' => 0, 'i' => 0];
-        $p = preg_split('/\s+/', trim(strtok($c, "\n")));
-        $v = [];
-        for ($i = 1; $i < count($p); $i++) $v[] = (int)$p[$i];
-        return ['t' => array_sum($v), 'i' => isset($v[3]) ? $v[3] : 0];
-    };
-
-    $a = $read(); usleep(200000); $b = $read();
-    $dt = $b['t'] - $a['t']; $di = $b['i'] - $a['i'];
-    if ($dt <= 0) return 0.0;
-    return round((1.0 - ($di / $dt)) * 100.0, 1);
+    $cores = hw_cpuCores();
+    if ($cores < 1) $cores = 1;
+    $percent = ($load[0] / $cores) * 100.0;
+    return round(min($percent, 100.0), 1);
 }
 
 /* ── CPU temp ────────────────────────────────────────────────── */
