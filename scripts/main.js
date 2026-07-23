@@ -907,11 +907,15 @@ if (!repeaterFastPollTimer) {
 });
 
 function refreshAllPanels() {
-    fetchStatus();
-    fetchUptime();
-    fetchHardware();
-    fetchHardwareLive();
-    fetchEcholink();
-    fetchRepeaterStatus();
-    if (document.getElementById('nodes-live')) fetchNodes();
+    // Rozkładamy wywołania w czasie zamiast odpalać je wszystkie
+    // jednocześnie — po powrocie z ukrytej karty jednoczesne fetch()
+    // + parsowanie JSON + reflow DOM dla kilku paneli naraz powoduje
+    // krótki, ale widoczny pik CPU. Odstęp 80ms między wywołaniami
+    // jest niezauważalny dla użytkownika, a rozbija ten impuls.
+    var tasks = [fetchStatus, fetchUptime, fetchHardware, fetchHardwareLive, fetchEcholink, fetchRepeaterStatus];
+    if (document.getElementById('nodes-live')) tasks.push(fetchNodes);
+
+    tasks.forEach(function (task, index) {
+        setTimeout(task, index * 80);
+    });
 }
